@@ -1,16 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class PlayerStats : MonoBehaviour {
+[CreateAssetMenu(fileName = "PlayerStats", menuName = "My Game/PlayerStats")]
+public class PlayerStats : ScriptableObject {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public int Heals;
+    public int StartHealsCount;
+    [Space]
+    public int UltimateCapacity;
+    public int StartUltimateCount;
+    [Space]
+    public float MoveSpeed;
+    public float MaxMoveSpped;
+    [Space]
+    public float BulletDamage;
+    public float BulletSpeed;
+    public float reboundChance;
+
+
+
+
 }

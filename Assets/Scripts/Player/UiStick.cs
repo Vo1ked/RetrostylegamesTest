@@ -7,8 +7,8 @@ public class UiStick : MonoBehaviour,
 {
     public Action<Vector2> OnPositionChanged = (Vector2) => { };
 
-    [SerializeField] private float maxRange = 50;
-    [SerializeField] private RectTransform stick;
+    [SerializeField] private float _maxRange = 50;
+    [SerializeField] private RectTransform _stick;
 
     private bool isPause;
     public void OnPointerDown(PointerEventData eventData)
@@ -57,21 +57,21 @@ public class UiStick : MonoBehaviour,
         var distance = Vector2.Distance(Vector2.zero, position);
         var normalizedPosition = position.normalized;
 
-        if (distance > maxRange)
+        if (distance > _maxRange)
         {
 
-            stick.localPosition = new Vector2(maxRange * normalizedPosition.x, maxRange * normalizedPosition.y);
+            _stick.localPosition = new Vector2(_maxRange * normalizedPosition.x, _maxRange * normalizedPosition.y);
             return;
         }
         else
         {
-            stick.localPosition = position;
+            _stick.localPosition = position;
         }
 
     }
 
     private void ResetPosition()
     {
-        stick.localPosition = Vector2.zero;
+        _stick.localPosition = Vector2.zero;
     }
 }

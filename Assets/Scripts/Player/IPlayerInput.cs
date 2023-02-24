@@ -1,16 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
-public class IPlayerInput : MonoBehaviour {
+public interface IPlayerInput {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    event Action<Vector2> Direction;
+    event Action<Vector2> Rotation;
 }
