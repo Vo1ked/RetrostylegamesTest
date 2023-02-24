@@ -15,7 +15,9 @@ MonoBehaviour:
   StartHealsCount: 100
   UltimateCapacity: 100
   StartUltimateCount: 50
-  Movespeed: 10
+  MoveSpeed: 9
+  MaxMoveSpped: 1.1
+  RotationSpeed: 5
   BulletDamage: 10
   BulletSpeed: 5
   reboundChance: 0.05

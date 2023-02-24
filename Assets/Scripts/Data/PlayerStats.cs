@@ -11,6 +11,9 @@ public class PlayerStats : ScriptableObject {
     [Space]
     public float MoveSpeed;
     public float MaxMoveSpped;
+    public float RotationSpeed;
+    public float RotationSensity;
+
     [Space]
     public float BulletDamage;
     public float BulletSpeed;

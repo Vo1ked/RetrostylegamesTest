@@ -7,9 +7,11 @@ public class SampleSceneContext : MonoInstaller {
 
     public override void InstallBindings()
     {
-
-       // Container.BindInterfacesTo<UiStickInput>();
+#if UNITY_EDITOR
+        Container.Bind<IPlayerInput>().To<KeyBoardInput>().FromComponentInHierarchy().AsSingle();
+#else
         Container.Bind<IPlayerInput>().To<UiStickInput>().FromComponentInHierarchy().AsSingle();
+#endif
 
     }
 }
