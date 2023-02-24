@@ -5,7 +5,6 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
     public event Action<Vector2> Direction = (Vector2) => { };
     public event Action<Vector2> Rotation = (Vector2) => { };
     private bool _isPause;
-    private float sensity = 0.5f;
     public void OnPause(bool IsPause)
     {
         _isPause = IsPause;
@@ -27,7 +26,7 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
         Direction.Invoke(moveDirection);
 
         Vector2 rotation = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        Rotation.Invoke(rotation * sensity);
+        Rotation.Invoke(rotation);
 
     }
 }

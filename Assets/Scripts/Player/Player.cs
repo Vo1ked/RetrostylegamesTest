@@ -6,6 +6,7 @@ using Zenject;
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour {
 
+	[SerializeField] Transform _camera;
 
 	private Rigidbody _rigidbody;
 	private IPlayerInput _input;
@@ -16,6 +17,10 @@ public class Player : MonoBehaviour {
 	private Coroutine _moveCoroutine;
 	private Coroutine _rotateCoroutine;
 
+	private float _angleHorizontal;
+	private float _angleVertical;
+	private Quaternion _originRotation;
+	private Quaternion _originCameraRotation;
 
 	[Inject]
 	private void Construct(IPlayerInput input,PlayerStats playerStats)
@@ -33,7 +38,8 @@ public class Player : MonoBehaviour {
 
 		_input.Direction += OnMoveDirectionChanged;
 		_input.Rotation += OnMoveRotateChanged;
-
+		_originRotation = transform.localRotation;
+		_originCameraRotation = _camera.localRotation;
 	}
 	
 
@@ -58,7 +64,6 @@ public class Player : MonoBehaviour {
 			var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
 			_rigidbody.velocity = _rigidbody.velocity.normalized * speed;
 			float currentSpeed = _rigidbody.velocity.magnitude;
-			Debug.Log(currentSpeed);
 			yield return fixedUpdate;
 		}
 
@@ -67,11 +72,19 @@ public class Player : MonoBehaviour {
 
 	private IEnumerator Rotate()
 	{
-
 		while (_rotation != Vector3.zero)
 		{
-			transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_rotation),
-				_playerStats.RotationSpeed * Time.deltaTime);
+			_angleHorizontal += _rotation.x * _playerStats.RotationSpeed;
+			_angleVertical -= _rotation.y * _playerStats.RotationSpeed;
+
+
+			_angleVertical = Mathf.Clamp(_angleVertical, _playerStats.MaxUpRotation, _playerStats.MaxDownRotation);
+
+			Quaternion rotationY = Quaternion.AngleAxis(_angleHorizontal, Vector3.up);
+			Quaternion rotationX = Quaternion.AngleAxis(_angleVertical, Vector3.right);
+
+			transform.localRotation = _originRotation * rotationY;
+			_camera.localRotation = _originCameraRotation * rotationX;
 			yield return null;
 		}
 
@@ -80,7 +93,7 @@ public class Player : MonoBehaviour {
 
 	private void OnMoveRotateChanged(Vector2 rotation)
 	{
-		_rotation = new Vector3(rotation.x, 0f, rotation.y);
+		_rotation = rotation;
         if (_rotateCoroutine == null)
         {
 			_rotateCoroutine = StartCoroutine(Rotate());

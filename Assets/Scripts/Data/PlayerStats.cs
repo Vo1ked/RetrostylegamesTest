@@ -12,7 +12,8 @@ public class PlayerStats : ScriptableObject {
     public float MoveSpeed;
     public float MaxMoveSpped;
     public float RotationSpeed;
-    public float RotationSensity;
+    public float MaxUpRotation = -90;
+    public float MaxDownRotation = 40;
 
     [Space]
     public float BulletDamage;

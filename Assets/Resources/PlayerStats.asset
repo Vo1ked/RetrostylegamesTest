@@ -17,7 +17,9 @@ MonoBehaviour:
   StartUltimateCount: 50
   MoveSpeed: 9
   MaxMoveSpped: 1.1
-  RotationSpeed: 5
+  RotationSpeed: 4
+  MaxUpRotation: -75
+  MaxDownRotation: 35
   BulletDamage: 10
   BulletSpeed: 5
   reboundChance: 0.05
