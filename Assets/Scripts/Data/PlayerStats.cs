@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerStats", menuName = "My Game/PlayerStats")]
 public class PlayerStats : ScriptableObject {
@@ -15,10 +16,8 @@ public class PlayerStats : ScriptableObject {
     public float MaxUpRotation = -90;
     public float MaxDownRotation = 40;
 
-    [Space]
-    public float BulletDamage;
-    public float BulletSpeed;
-    public float reboundChance;
+    public List<Ability> Abilities;
+
 
 
 

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemySpawner : MonoBehaviour {
+public class BulletContainer : MonoBehaviour {
 
-	public List<Enemy> enemies = new List<Enemy>();
 	// Use this for initialization
 	void Start () {
 		

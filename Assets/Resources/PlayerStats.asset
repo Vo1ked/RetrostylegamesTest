@@ -20,6 +20,5 @@ MonoBehaviour:
   RotationSpeed: 4
   MaxUpRotation: -75
   MaxDownRotation: 35
-  BulletDamage: 10
-  BulletSpeed: 5
-  reboundChance: 0.05
+  Abilities:
+  - {fileID: 11400000, guid: 9426eebfb387a6d4e8dbc8fd5abe69f4, type: 2}

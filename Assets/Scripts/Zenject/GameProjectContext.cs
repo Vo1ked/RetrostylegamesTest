@@ -13,6 +13,8 @@ public class GameProjectContext : MonoInstaller {
             .FromInstance(playerStats)
             .AsSingle()
             .NonLazy();
+
+        Container.Bind<PauseManager>().FromNew().AsSingle();
         
     }
 

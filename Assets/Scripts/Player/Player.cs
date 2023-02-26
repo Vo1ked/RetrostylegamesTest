@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
@@ -8,7 +9,7 @@ public class Player : MonoBehaviour {
 
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
 
-	[SerializeField] Transform _camera;
+	[SerializeField] private Transform _camera;
 
 	private Rigidbody _rigidbody;
 

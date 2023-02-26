@@ -14,6 +14,10 @@ public class SampleSceneContext : MonoInstaller {
 #endif
 
         Container.Bind<ISpawnPoisition>().To<SpawnByRandomRadius>().AsSingle();
+        Container.Bind<EnemySpawner>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<CoroutineRunner>().FromComponentInChildren().AsSingle();
+
 
     }
 }

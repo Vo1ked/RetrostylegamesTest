@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Zenject;
 
 public class UiStick : MonoBehaviour, 
     IPointerDownHandler, IPointerUpHandler, IDragHandler, IPauseHandler
@@ -10,10 +11,17 @@ public class UiStick : MonoBehaviour,
     [SerializeField] private float _maxRange = 50;
     [SerializeField] private RectTransform _stick;
 
-    private bool isPause;
+    private PauseManager _pauseManager;
+
+    [Inject]
+    private void Construct(PauseManager pauseManager)
+    {
+        _pauseManager = pauseManager;
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (isPause)
+        if (_pauseManager.IsPaused)
             return;
 
         Vector2 localPosition;
@@ -32,7 +40,7 @@ public class UiStick : MonoBehaviour,
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (isPause)
+        if (_pauseManager.IsPaused)
             return;
         Vector2 localPosition;
         ConvertTolocalPosition(eventData.position, out localPosition);
