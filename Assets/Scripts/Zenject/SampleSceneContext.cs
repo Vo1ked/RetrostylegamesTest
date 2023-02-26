@@ -13,5 +13,7 @@ public class SampleSceneContext : MonoInstaller {
         Container.Bind<IPlayerInput>().To<UiStickInput>().FromComponentInHierarchy().AsSingle();
 #endif
 
+        Container.Bind<ISpawnPoisition>().To<SpawnByRandomRadius>().AsSingle();
+
     }
 }

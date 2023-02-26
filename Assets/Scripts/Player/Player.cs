@@ -1,16 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using Zenject;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour {
 
+	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
+
 	[SerializeField] Transform _camera;
 
 	private Rigidbody _rigidbody;
-	private IPlayerInput _input;
-	private PlayerStats _playerStats;
 
 	private Vector3 _direction;
 	private Vector3 _rotation;
@@ -22,24 +22,34 @@ public class Player : MonoBehaviour {
 	private Quaternion _originRotation;
 	private Quaternion _originCameraRotation;
 
+	private IPlayerInput _input;
+	private PlayerStats _playerStats;
+	private ISpawnPoisition _spawnPoisition;
 	[Inject]
-	private void Construct(IPlayerInput input,PlayerStats playerStats)
+	private void Construct(IPlayerInput input,PlayerStats playerStats,ISpawnPoisition spawnPoisition)
     {
 		_input = input;
 		_playerStats = playerStats;
+		_spawnPoisition = spawnPoisition;
+    }
+
+	public void OnPlayerTeleport()
+    {
+		PlayerStartTeleport.Invoke(transform.position);
     }
 
 	private void Awake()
     {
 		_rigidbody = GetComponent<Rigidbody>();
     }
-	// Use this for initialization
-	void Start () {
+
+	private void Start () {
 
 		_input.Direction += OnMoveDirectionChanged;
 		_input.Rotation += OnMoveRotateChanged;
 		_originRotation = transform.localRotation;
 		_originCameraRotation = _camera.localRotation;
+		transform.position = _spawnPoisition.GetSpawnPosition();
 	}
 	
 
