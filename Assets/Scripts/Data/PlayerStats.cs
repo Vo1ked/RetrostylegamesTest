@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 [CreateAssetMenu(fileName = "PlayerStats", menuName = "My Game/PlayerStats")]
 public class PlayerStats : ScriptableObject {
@@ -18,8 +19,15 @@ public class PlayerStats : ScriptableObject {
 
     public List<Ability> Abilities;
 
+    [Inject]
+    private void Construct(DiContainer container)
+    {
+        foreach (Ability ability in Abilities)
+        {
+            var type = ability.GetType();
+            Debug.Log(type);
 
-
-
-
+            container.Inject(ability);
+        }
+    }
 }

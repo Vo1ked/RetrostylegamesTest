@@ -5,6 +5,8 @@ using Zenject;
 public class KeyBoardInput : MonoBehaviour, IPlayerInput {
     public event Action<Vector2> Direction = (Vector2) => { };
     public event Action<Vector2> Rotation = (Vector2) => { };
+    public event Action Fire = () => { };
+
     private PauseManager _pauseManager;
 
     [Inject]
@@ -33,6 +35,11 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
 
         Vector2 rotation = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         Rotation.Invoke(rotation);
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            Fire.Invoke();
+        }
 
     }
 }

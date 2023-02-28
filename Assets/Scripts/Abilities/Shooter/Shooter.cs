@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
@@ -7,20 +6,22 @@ using Zenject;
 public class Shooter : Ability, IPauseHandler
 {
     [Space]
-    [SerializeField] private ABullet Bullet;
+    [SerializeField] private BulletsController Bullet;
     [SerializeField] private float ReloadTime;
+
     private float _reloadTime;
     private Coroutine _reload;
+
     private CoroutineRunner _coroutineRunner;
     private PauseManager _pauseManager;
 
     [Inject]
-    private void Construct(CoroutineRunner coroutineRunner, PauseManager pauseManager)
+    private void Construct(CoroutineRunner coroutineRunner, PauseManager pauseManager, DiContainer container)
     {
         _coroutineRunner = coroutineRunner;
         _pauseManager = pauseManager;
-
         _pauseManager.SubscribeHandler(this);
+        container.Inject(Bullet);
 
         Specialization = Specialization.Attack;
         WorkType = WorkType.@override;
@@ -32,8 +33,8 @@ public class Shooter : Ability, IPauseHandler
             return;
 
         Bullet.Shooter = user;
-        Bullet.Spawn();
-        Bullet.Move();
+        var bullet = Bullet.Spawn();
+        Bullet.Move(bullet);
         _reload = _coroutineRunner.RunCoroutine(Reload(ReloadTime));
     }
 
@@ -54,6 +55,9 @@ public class Shooter : Ability, IPauseHandler
     {
         if (isPause)
         {
+            if (_reload == null)
+                return;
+
             _coroutineRunner.StopCoroutine(_reload);
             _reload = null;
         }

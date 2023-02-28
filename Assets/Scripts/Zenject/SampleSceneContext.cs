@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-public class SampleSceneContext : MonoInstaller {
+public class SampleSceneContext : MonoInstaller{
 
     public override void InstallBindings()
     {
@@ -16,8 +14,8 @@ public class SampleSceneContext : MonoInstaller {
         Container.Bind<ISpawnPoisition>().To<SpawnByRandomRadius>().AsSingle();
         Container.Bind<EnemySpawner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
-        Container.Bind<CoroutineRunner>().FromComponentInChildren().AsSingle();
+        Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
 
-
+       // Container.Bind<Shooter>().FromInstance(_shooter).AsSingle();
     }
 }

@@ -2,5 +2,5 @@
 
 public interface ITargetSearch
 {
-    Transform GetTarget(Vector3 position);
+    Vector3 GetTarget(Vector3 position);
 }

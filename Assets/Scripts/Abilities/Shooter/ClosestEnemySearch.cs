@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 public class ClosestEnemySearch : ITargetSearch
@@ -12,7 +10,7 @@ public class ClosestEnemySearch : ITargetSearch
     {
         _enemySpawner = enemySpawner;
     }
-    public Transform GetTarget(Vector3 position)
+    public Vector3 GetTarget(Vector3 position)
     {
         Enemy closest = null;
         Vector3 enemyPosition = Vector3.positiveInfinity;
@@ -29,6 +27,6 @@ public class ClosestEnemySearch : ITargetSearch
             }
         }
 
-        return closest.transform;
+        return closest.transform.position;
     }
 }

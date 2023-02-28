@@ -15,9 +15,9 @@ MonoBehaviour:
   StartHealsCount: 100
   UltimateCapacity: 100
   StartUltimateCount: 50
-  MoveSpeed: 9
-  MaxMoveSpped: 1.1
-  RotationSpeed: 4
+  MoveSpeed: 2
+  MaxMoveSpped: 3
+  RotationSpeed: 2
   MaxUpRotation: -75
   MaxDownRotation: 35
   Abilities:

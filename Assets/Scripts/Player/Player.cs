@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : MonoBehaviour {
-
+public class Player : MonoBehaviour, IBulletSpawn
+{
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
 
 	[SerializeField] private Transform _camera;
+	[SerializeField] private Transform _bulletSpawnPoint;
 
 	private Rigidbody _rigidbody;
 
@@ -27,59 +29,65 @@ public class Player : MonoBehaviour {
 	private PlayerStats _playerStats;
 	private ISpawnPoisition _spawnPoisition;
 	[Inject]
-	private void Construct(IPlayerInput input,PlayerStats playerStats,ISpawnPoisition spawnPoisition)
-    {
+	private void Construct(IPlayerInput input, PlayerStats playerStats, ISpawnPoisition spawnPoisition)
+	{
 		_input = input;
 		_playerStats = playerStats;
 		_spawnPoisition = spawnPoisition;
-    }
+	}
 
 	public void OnPlayerTeleport()
-    {
+	{
 		PlayerStartTeleport.Invoke(transform.position);
-    }
+	}
 
 	private void Awake()
-    {
+	{
 		_rigidbody = GetComponent<Rigidbody>();
-    }
+	}
 
-	private void Start () {
+	private void Start()
+	{
 
 		_input.Direction += OnMoveDirectionChanged;
 		_input.Rotation += OnMoveRotateChanged;
+		_input.Fire += Attack;
 		_originRotation = transform.localRotation;
 		_originCameraRotation = _camera.localRotation;
 		transform.position = _spawnPoisition.GetSpawnPosition();
+
+		var container = FindObjectOfType<SceneContext>().Container;
+		container.Inject(_playerStats);
 	}
-	
+
 
 	private void OnMoveDirectionChanged(Vector2 direction)
-    {
+	{
 		_direction = transform.rotation * new Vector3(direction.x, 0, direction.y);
 
-        if (_moveCoroutine == null)
-        {
-            _moveCoroutine = StartCoroutine(Move());
-        }
+		if (_moveCoroutine == null)
+		{
+			_moveCoroutine = StartCoroutine(Move());
+		}
 	}
 
 	private IEnumerator Move()
-    {
+	{
 		var fixedUpdate = new WaitForFixedUpdate();
 
-		while(_direction != Vector3.zero)
-        {
+		while (_direction != Vector3.zero)
+		{
 			Vector3 movement = new Vector3(_direction.x, 0.0f, _direction.z);
-			_rigidbody.AddForce(movement * _playerStats.MoveSpeed);
-			var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
-			_rigidbody.velocity = _rigidbody.velocity.normalized * speed;
-			float currentSpeed = _rigidbody.velocity.magnitude;
-			yield return fixedUpdate;
+			_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
+            var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
+            _rigidbody.velocity = _rigidbody.velocity.normalized * speed;
+            float currentSpeed = _rigidbody.drag;
+			Debug.Log("speed = " + (currentSpeed));
+            yield return fixedUpdate;
 		}
 
 		_moveCoroutine = null;
-    }
+	}
 
 	private IEnumerator Rotate()
 	{
@@ -102,20 +110,48 @@ public class Player : MonoBehaviour {
 		_rotateCoroutine = null;
 	}
 
+	private void Attack()
+	{
+		List<Ability> abilities = new List<Ability>();
+		if (!Ability.AbilityCheck(_playerStats.Abilities, Specialization.Attack, ref abilities))
+		{
+			return;
+		}
+		var overrideAbility = abilities.First(abbility => abbility.WorkType == WorkType.@override);
+
+		if (overrideAbility != null)
+		{
+			overrideAbility.Execute(gameObject, this);
+			abilities.Remove(overrideAbility);
+		}
+
+		foreach (Ability ability in abilities)
+		{
+			ability.Execute(gameObject, this);
+		}
+
+	}
+
 	private void OnMoveRotateChanged(Vector2 rotation)
 	{
 		_rotation = rotation;
-        if (_rotateCoroutine == null)
-        {
+		if (_rotateCoroutine == null)
+		{
 			_rotateCoroutine = StartCoroutine(Rotate());
-        }
-		
+		}
+
 
 	}
 
 	private void OnDestroy()
-    {
+	{
 		_input.Direction -= OnMoveDirectionChanged;
 		_input.Rotation -= OnMoveRotateChanged;
+		_input.Fire -= Attack;
+	}
+
+	public Vector3 GetSpawnPosition()
+	{
+		return _bulletSpawnPoint.position;
 	}
 }

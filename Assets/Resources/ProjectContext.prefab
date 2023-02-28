@@ -80,4 +80,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8d5957b43a62cf458c66a26fa521a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerStats: {fileID: 11400000, guid: fa837d0a7af326d47aa94ff5f4b54c18, type: 2}
+  _playerStats: {fileID: 11400000, guid: fa837d0a7af326d47aa94ff5f4b54c18, type: 2}
+  _shooter: {fileID: 11400000, guid: 9426eebfb387a6d4e8dbc8fd5abe69f4, type: 2}
