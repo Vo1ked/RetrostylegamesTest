@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dbfdea80bed9754095a50f1fc788c6a, type: 3}
+  m_Name: BlueEnemyBulletStats
+  m_EditorClassIdentifier: 
+  name: BlueEnemyBullet
+  Bullet: {fileID: 114281401858347170, guid: db016b727c121994fbfbe4fb7f33b80f, type: 2}
+  Shooter: {fileID: 0}
+  Speed: 1
+  HitInfo:
+    _healsDamage: 0
+    _manaDamage: 25

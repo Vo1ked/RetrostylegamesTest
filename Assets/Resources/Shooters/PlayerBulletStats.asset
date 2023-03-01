@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dbfdea80bed9754095a50f1fc788c6a, type: 3}
+  m_Name: PlayerBulletStats
+  m_EditorClassIdentifier: 
+  name: PlayerBullet
+  Bullet: {fileID: 114932698647415610, guid: 89dc911d0dd3de542a80e9bd85c2dfea, type: 2}
+  Shooter: {fileID: 0}
+  Speed: 6
+  HitInfo:
+    _healsDamage: 25
+    _manaDamage: 0

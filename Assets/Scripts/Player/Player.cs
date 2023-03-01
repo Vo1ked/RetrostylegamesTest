@@ -6,12 +6,13 @@ using UnityEngine;
 using Zenject;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : MonoBehaviour, IBulletSpawn
+public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
 {
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
 
 	[SerializeField] private Transform _camera;
 	[SerializeField] private Transform _bulletSpawnPoint;
+	[SerializeField] private PlayerStats _playerStats;
 
 	private Rigidbody _rigidbody;
 
@@ -24,15 +25,15 @@ public class Player : MonoBehaviour, IBulletSpawn
 	private float _angleVertical;
 	private Quaternion _originRotation;
 	private Quaternion _originCameraRotation;
+	public int PlayerHeals { get; private set; }
+	public int PlayerMana { get; private set; }
 
 	private IPlayerInput _input;
-	private PlayerStats _playerStats;
 	private ISpawnPoisition _spawnPoisition;
 	[Inject]
-	private void Construct(IPlayerInput input, PlayerStats playerStats, ISpawnPoisition spawnPoisition)
+	private void Construct(IPlayerInput input, ISpawnPoisition spawnPoisition)
 	{
 		_input = input;
-		_playerStats = playerStats;
 		_spawnPoisition = spawnPoisition;
 	}
 
@@ -57,7 +58,10 @@ public class Player : MonoBehaviour, IBulletSpawn
 		transform.position = _spawnPoisition.GetSpawnPosition();
 
 		var container = FindObjectOfType<SceneContext>().Container;
-		container.Inject(_playerStats);
+		foreach (Ability ability in _playerStats.Abilities)
+		{
+			container.Inject(ability);
+		}
 	}
 
 
@@ -81,8 +85,6 @@ public class Player : MonoBehaviour, IBulletSpawn
 			_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
             var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
             _rigidbody.velocity = _rigidbody.velocity.normalized * speed;
-            float currentSpeed = _rigidbody.drag;
-			Debug.Log("speed = " + (currentSpeed));
             yield return fixedUpdate;
 		}
 
@@ -154,4 +156,15 @@ public class Player : MonoBehaviour, IBulletSpawn
 	{
 		return _bulletSpawnPoint.position;
 	}
+
+    public void Damage(HitInfo hit)
+    {
+		PlayerHeals -= hit.HealsDamage;
+		PlayerMana -= hit.ManaDamage;
+	}
+
+    public void TryAttack()
+    {
+
+    }
 }

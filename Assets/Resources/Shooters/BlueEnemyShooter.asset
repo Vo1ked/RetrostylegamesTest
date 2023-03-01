@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f3ca8da5f9414543a505d9941584ecd, type: 3}
-  m_Name: PlayerShooter
+  m_Name: BlueEnemyShooter
   m_EditorClassIdentifier: 
-  Bullet: {fileID: 11400000, guid: 9403f5a8d38c1394d84fb83db5dfb0ed, type: 2}
-  ReloadTime: 0.3
+  Bullet: {fileID: 11400000, guid: 781e11ccc1f2a374082dc77f18cc8c70, type: 2}
+  ReloadTime: 3

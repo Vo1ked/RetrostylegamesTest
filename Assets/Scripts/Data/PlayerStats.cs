@@ -18,16 +18,4 @@ public class PlayerStats : ScriptableObject {
     public float MaxDownRotation = 40;
 
     public List<Ability> Abilities;
-
-    [Inject]
-    private void Construct(DiContainer container)
-    {
-        foreach (Ability ability in Abilities)
-        {
-            var type = ability.GetType();
-            Debug.Log(type);
-
-            container.Inject(ability);
-        }
-    }
 }

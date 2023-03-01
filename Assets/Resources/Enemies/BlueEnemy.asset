@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5813cc97eb18864aa3ddffbcce01cc5, type: 3}
+  m_Name: BlueEnemy
+  m_EditorClassIdentifier: 
+  name: BlueEnemy
+  enemy: {fileID: 114698093572227744, guid: 716736171df2ade4bbb0fbb530cfa63b, type: 2}
+  Heals: 100
+  StartHeals: 100
+  MoveSpeed: 1
+  RotationSpeed: 1
+  Abilities:
+  - {fileID: 11400000, guid: 4a2e2c50971bc2b45a35f9e0756843ca, type: 2}

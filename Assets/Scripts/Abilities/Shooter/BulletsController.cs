@@ -1,19 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Zenject;
 using System;
 
 [Serializable]
-public class BulletsController : IPauseHandler
+[CreateAssetMenu(fileName = "BulletsController", menuName = "My Game/Shooter/BulletsController")]
+public class BulletsController : ScriptableObject, IPauseHandler
 {
     [HideInInspector] public GameObject Shooter;
-    [SerializeField] private ITargetSearch _target;
     [SerializeField] private Vector3 _spawnOffset;
 
-    [SerializeField] private BulletsStats _bulletsStats;
-    [SerializeField] protected List<Bullet> _spawnedBullets;
+    [SerializeField] protected BulletsStats _bulletsStats;
+    protected List<Bullet> _spawnedBullets;
 
     protected BulletContainer _bulletContainer;
     protected CoroutineRunner _coroutineRunner;
@@ -23,24 +22,21 @@ public class BulletsController : IPauseHandler
     [Inject]
     private void Construct(BulletContainer bulletContainer, CoroutineRunner coroutineRunner, PauseManager pauseManager)
     {
-        Debug.Log("BulletsController Construct start");
         _bulletContainer = bulletContainer;
         _coroutineRunner = coroutineRunner;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
         _spawnedBullets = new List<Bullet>();
-        Debug.Log("BulletsController Construct end");
-
     }
 
 
 
-    public virtual Bullet Spawn()
+    public virtual void Spawn()
     {
         if (_bulletsStats.Bullet == null)
         {
             Debug.LogError($"Bullet {_bulletsStats.name} did`t contain  bullet");
-            return null;
+            return;
         }
         var spawnPosition = Shooter.GetComponent<IBulletSpawn>().GetSpawnPosition();
         var _spawnedBullet = GameObject.Instantiate<Bullet>(_bulletsStats.Bullet, spawnPosition + _spawnOffset, Quaternion.identity, _bulletContainer.transform);
@@ -48,8 +44,7 @@ public class BulletsController : IPauseHandler
         _spawnedBullet.Hited += OnCollision;
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
         _spawnedBullets.Add(_spawnedBullet);
-        return _spawnedBullet;
-
+        Move(_spawnedBullet);
     }
 
     protected virtual void OnCollision(Bullet bullet,Collider other)
@@ -67,19 +62,10 @@ public class BulletsController : IPauseHandler
 
     public virtual void Move(Bullet bullet)
     {
-        SetMoveDirection(bullet);
+        bullet.transform.LookAt(Shooter.transform);
         bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
     }
 
-    private void SetMoveDirection(Bullet bullet)
-    {
-        var spawnPosition = Shooter.GetComponent<IBulletSpawn>().GetSpawnPosition();
-        Vector3 direction = (spawnPosition - Shooter.transform.position).normalized;
-
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        bullet.transform.LookAt(Shooter.transform);
-
-    }
 
     protected virtual void Hit(Bullet bullet,IDamageble damageble)
     {
@@ -90,10 +76,12 @@ public class BulletsController : IPauseHandler
     protected virtual void Destroy(Bullet bullet)
     {
         bullet.Hited -= OnCollision;
+        _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
         _spawnedBullets.Remove(bullet);
+        GameObject.Destroy(bullet.gameObject);
     }
 
-    private IEnumerator MoveForward(Bullet bullet)
+    protected IEnumerator MoveForward(Bullet bullet)
     {
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
@@ -102,7 +90,6 @@ public class BulletsController : IPauseHandler
             yield return null;
             bullet.TimeToDeleteLeft -= Time.deltaTime;
         }
-        Debug.Log("MoveForward end");
 
         bullet.MoveCoroutine = null;
     }

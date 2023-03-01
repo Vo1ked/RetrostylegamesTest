@@ -16,7 +16,24 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
     }
     public void OnPause(bool IsPause)
     {
+        if (IsPause)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
 
+    void Start()
+    {
+        // Сховати курсор миші
+        Cursor.visible = false;
+        // Зафіксувати курсор миші в центрі екрану
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Update is called once per frame

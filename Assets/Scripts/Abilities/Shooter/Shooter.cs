@@ -33,14 +33,13 @@ public class Shooter : Ability, IPauseHandler
             return;
 
         Bullet.Shooter = user;
-        var bullet = Bullet.Spawn();
-        Bullet.Move(bullet);
+        Bullet.Spawn();
         _reload = _coroutineRunner.RunCoroutine(Reload(ReloadTime));
     }
 
     private IEnumerator Reload(float timer)
     {
-        float _reloadTime = timer;
+        _reloadTime = timer;
 
         while (_reloadTime > 0)
         {

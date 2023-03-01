@@ -15,6 +15,7 @@ public class SampleSceneContext : MonoInstaller{
         Container.Bind<EnemySpawner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
         Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
 
        // Container.Bind<Shooter>().FromInstance(_shooter).AsSingle();
     }
