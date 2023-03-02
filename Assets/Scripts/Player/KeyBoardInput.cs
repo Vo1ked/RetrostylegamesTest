@@ -2,25 +2,29 @@
 using UnityEngine;
 using Zenject;
 
-public class KeyBoardInput : MonoBehaviour, IPlayerInput {
+public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
     public event Action<Vector2> Direction = (Vector2) => { };
     public event Action<Vector2> Rotation = (Vector2) => { };
     public event Action Fire = () => { };
     public event Action Ultimate = () => { };
 
     private PauseManager _pauseManager;
-
+    private UiManager _uiManager;
     [Inject]
-    private void Construct(PauseManager pauseManager)
+    private void Construct(PauseManager pauseManager,UiManager uiManager)
     {
         _pauseManager = pauseManager;
+        _uiManager = uiManager;
+
     }
     public void OnPause(bool IsPause)
     {
         if (IsPause)
         {
             Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.Confined;
+            Direction.Invoke(Vector2.zero);
+            Rotation.Invoke(Vector2.zero);
         }
         else
         {
@@ -31,10 +35,10 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
 
     void Start()
     {
-        // Сховати курсор миші
         Cursor.visible = false;
-        // Зафіксувати курсор миші в центрі екрану
         Cursor.lockState = CursorLockMode.Locked;
+        _pauseManager.SubscribeHandler(this);
+
     }
 
     // Update is called once per frame
@@ -42,7 +46,8 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
     {
         if (Input.GetButton("Cancel"))
         {
-            _pauseManager.SetPause(!_pauseManager.IsPaused);
+            _uiManager.OnOptionsClick();
+            return;
         }
 
         if (_pauseManager.IsPaused)
@@ -62,5 +67,10 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
         {
             Ultimate.Invoke();
         }
+    }
+
+    private void OnDestroy()
+    {
+        _pauseManager.UnsubscribeHandler(this);
     }
 }

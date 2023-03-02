@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class PauseManager {
-
-	public bool IsPaused { get; private set; }
+﻿using System.Collections.Generic;
+public class PauseManager
+{
+    public bool IsPaused { get; private set; } = false;
 
 	private List<IPauseHandler> _pauseHandlers = new List<IPauseHandler>();
 
@@ -22,10 +19,6 @@ public class PauseManager {
     public void SetPause(bool isPaused)
     {
 		IsPaused = isPaused;
-        foreach (IPauseHandler handler  in _pauseHandlers)
-        {
-            handler.OnPause(IsPaused);
-        }
+        _pauseHandlers.ForEach(x => x.OnPause(isPaused));
     }
-
 }

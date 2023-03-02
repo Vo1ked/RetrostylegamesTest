@@ -136,13 +136,20 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
     public void OnPause(bool IsPause)
     {
-        if (IsPause && _spawnWait != null)
+        if (IsPause)
         {
-			StopCoroutine(_spawnWait);
+            if (_spawnWait != null)
+            {
+                StopCoroutine(_spawnWait);
+                _spawnWait = null;
+            }
         }
         else
         {
-			_spawnWait = StartCoroutine(SpawnWait(_toNextSpawn));
+            if (_spawnWait == null)
+            {
+                _spawnWait = StartCoroutine(SpawnWait(_toNextSpawn));
+            }
         }
     }
 
@@ -154,7 +161,12 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         {
 			yield return null;
 			_toNextSpawn -= Time.deltaTime;
+            if (_pauseManager.IsPaused)
+            {
+                yield break;
+            }
         }
+        _spawnWait = null;
 
         Spawn();
     }
@@ -162,6 +174,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private void OnDestroy()
     {
         _pauseManager.UnsubscribeHandler(this);
+        _input.Ultimate -= OnUltimate;
     }
 
 }

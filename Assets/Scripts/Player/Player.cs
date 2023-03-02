@@ -6,9 +6,10 @@ using UnityEngine;
 using Zenject;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : MonoBehaviour, IBulletSpawn, IDamageble
+public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 {
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
+	public event Action OnPlayerDestroy = () => { };
 
 	[SerializeField] private Transform _camera;
 	[SerializeField] private Transform _bulletSpawnPoint;
@@ -31,11 +32,14 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 
 	private IPlayerInput _input;
 	private ISpawnPoisition _spawnPoisition;
+    private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(IPlayerInput input, ISpawnPoisition spawnPoisition)
+	private void Construct(IPlayerInput input, ISpawnPoisition spawnPoisition, PauseManager pauseManager)
 	{
 		_input = input;
 		_spawnPoisition = spawnPoisition;
+		_pauseManager = pauseManager;
+
 	}
 
 	public void OnPlayerTeleport()
@@ -48,6 +52,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 		_rigidbody = GetComponent<Rigidbody>();
 		_playerStats.Heals.CurrentHeals = _playerStats.Heals.StartHeals;
 		_playerStats.Mana.CurrentMana = _playerStats.Mana.StartMana;
+		_pauseManager.SubscribeHandler(this);
 	}
 
 	private void Start()
@@ -86,6 +91,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 		{
 			Vector3 movement = new Vector3(_direction.x, 0.0f, _direction.z);
 			_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
+
             var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
             _rigidbody.velocity = _rigidbody.velocity.normalized * speed;
             yield return fixedUpdate;
@@ -96,7 +102,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 
 	private IEnumerator Rotate()
 	{
-		while (_rotation != Vector3.zero)
+		while (_rotation != Vector3.zero || !_pauseManager.IsPaused)
 		{
 			_angleHorizontal += _rotation.x * _playerStats.RotationSpeed;
 			_angleVertical -= _rotation.y * _playerStats.RotationSpeed;
@@ -172,6 +178,8 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 		_input.Direction -= OnMoveDirectionChanged;
 		_input.Rotation -= OnMoveRotateChanged;
 		_input.Fire -= Attack;
+		_pauseManager.UnsubscribeHandler(this);
+		OnPlayerDestroy.Invoke();
 	}
 
 	public Vector3 GetSpawnPosition()
@@ -189,11 +197,22 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 	{
 		if (isPause)
 		{
-			if (_reloadCoroutine == null)
-				return;
+            if (_moveCoroutine != null)
+            {
+				StopCoroutine(_moveCoroutine);
+				_moveCoroutine = null;
+			}
+			if (_rotateCoroutine != null)
+			{
+				StopCoroutine(_rotateCoroutine);
+				_rotateCoroutine = null;
+			}
 
-			StopCoroutine(_reloadCoroutine);
-			_reloadCoroutine = null;
+			if (_reloadCoroutine != null)
+			{
+				StopCoroutine(_reloadCoroutine);
+				_reloadCoroutine = null;
+			}
 		}
 		else
 		{

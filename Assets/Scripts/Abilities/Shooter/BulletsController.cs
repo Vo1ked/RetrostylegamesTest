@@ -12,20 +12,22 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
     [SerializeField] protected BulletsStats _bulletsStats;
     [NonSerialized] protected List<Bullet> _spawnedBullets = new List<Bullet>();
+    protected static float _autoDeleteTimer = 60;
+    [NonSerialized] protected int _bulletIndex;
 
     protected BulletContainer _bulletContainer;
     protected CoroutineRunner _coroutineRunner;
-    protected static float _autoDeleteTimer = 60;
     protected PauseManager _pauseManager;
-    [NonSerialized] protected int _bulletIndex;
 
     [Inject]
-    private void Construct(BulletContainer bulletContainer, CoroutineRunner coroutineRunner, PauseManager pauseManager)
+    private void Construct(BulletContainer bulletContainer, CoroutineRunner coroutineRunner, PauseManager pauseManager, Dispose dispose)
     {
         _bulletContainer = bulletContainer;
         _coroutineRunner = coroutineRunner;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
+
+        dispose.OnDispose += () => _pauseManager.UnsubscribeHandler(this);
 
     }
 
@@ -64,7 +66,7 @@ public class BulletsController : ScriptableObject, IPauseHandler
     public virtual void Move(Bullet bullet)
     {
         bullet.transform.LookAt(bullet.Shooter.transform);
-        bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
+        bullet.MoveCoroutine = _coroutineRunner.RunCoroutine(MoveForward(bullet));
     }
 
 
@@ -77,19 +79,33 @@ public class BulletsController : ScriptableObject, IPauseHandler
     protected virtual void Destroy(Bullet bullet)
     {
         bullet.Hited -= OnCollision;
-        _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
+        if (bullet.MoveCoroutine != null)
+        {
+            _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
+            bullet.MoveCoroutine = null;
+        }
+
         _spawnedBullets.Remove(bullet);
         GameObject.Destroy(bullet.gameObject);
     }
 
     protected IEnumerator MoveForward(Bullet bullet)
     {
+        if (bullet == null)
+        {
+            yield break;
+        }
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
         {
+            if (_pauseManager.IsPaused)
+            {
+                yield break;
+            }
             rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward * _bulletsStats.Speed * Time.deltaTime);
             yield return null;
             bullet.TimeToDeleteLeft -= Time.deltaTime;
+
         }
 
         bullet.MoveCoroutine = null;
@@ -104,7 +120,11 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
             foreach (Bullet bullet in _spawnedBullets)
             {
-                _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
+                if (bullet.MoveCoroutine != null)
+                {
+                    _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
+                    bullet.MoveCoroutine = null;
+                }
             }
         }
         else
@@ -114,7 +134,10 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
             foreach (Bullet bullet in _spawnedBullets)
             {
-                bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
+                if (bullet.MoveCoroutine == null)
+                {
+                    bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
+                }
             }
         }
     }

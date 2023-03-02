@@ -61,6 +61,10 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     {
         var pathUpdateDelay = 0.5f;
         var wait = new WaitForSeconds(pathUpdateDelay);
+        if (_pauseManager.IsPaused)
+        {
+            yield break;
+        }
         _agent.SetDestination(_player.transform.position);
         yield return wait;
         _moveCoroutine = StartCoroutine(Move());
@@ -83,8 +87,11 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         }
         else
         {
-            _moveCoroutine = StartCoroutine(Move());
-            if (_attackReloadTimeLeft > 0)
+            if (_moveCoroutine == null)
+            {
+                _moveCoroutine = StartCoroutine(Move());
+            }
+            if (_attackReloadTimeLeft > 0 && _reloadCoroutine == null)
             {
                 _reloadCoroutine = StartCoroutine(WaitAttackRange(_attackReloadTimeLeft));
             }
@@ -145,6 +152,10 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         while (_attackReloadTimeLeft > 0)
         {
             yield return null;
+            if (_pauseManager.IsPaused)
+            {
+                yield break;
+            }
             _attackReloadTimeLeft -= Time.deltaTime;
         }
 
@@ -152,7 +163,12 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         while (Vector3.Distance(_player.transform.position, transform.position) > _attackAbillity.AttackRange)
         {
             yield return wait;
+            if (_pauseManager.IsPaused)
+            {
+                yield break;
+            }
         }
+        _reloadCoroutine = null;
         Attack();
     }
 
@@ -162,11 +178,14 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         if (_moveCoroutine != null)
         {
             StopCoroutine(_moveCoroutine);
+            _moveCoroutine = null;
         }
 
         if (_reloadCoroutine != null)
         {
             StopCoroutine(_reloadCoroutine);
+            _reloadCoroutine = null;
+
         }
 
     }

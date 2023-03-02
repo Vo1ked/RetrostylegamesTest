@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,25 +8,51 @@ using Zenject;
 public class UiManager : MonoBehaviour {
 
 	[SerializeField] private Button _options;
-	[SerializeField] private Text playerHeals;
+	[SerializeField] private UIOptionsPopup _optionsPopup;
+	[SerializeField] private UiGameOverPopup _gameOverPopup;
 
 
 
 	private PauseManager _pauseManager;
-	private Score _score;
+	private PlayerStats _playerStats;
 	[Inject]
-	private void Construct(PauseManager pauseManager,Score score)
+	private void Construct(PauseManager pauseManager, PlayerStats playerStats)
 	{
 		_pauseManager = pauseManager;
-		_score = score;
+		_playerStats = playerStats;
+
+		_playerStats.Heals.HealsChanged += OnDie;
 	}
-	// Use this for initialization
-	void Start () {
-		_options.onClick.AddListener(() => { _pauseManager.SetPause(!_pauseManager.IsPaused); });
+
+    private void OnDie(int heals)
+    {
+        if (heals < 1)
+        {
+			_pauseManager.SetPause(true);
+			_gameOverPopup.gameObject.SetActive(true);
+        }
+    }
+
+    void Start () 
+	{
+		_options.onClick.AddListener(OnOptionsClick);
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	private void OnDestroy()
+    {
+		_playerStats.Heals.HealsChanged -= OnDie;
 	}
+
+	public void OnOptionsClick()
+    {
+		_pauseManager.SetPause(true);
+		_optionsPopup.gameObject.SetActive(true);
+		_optionsPopup.Closed += OnOptionsClose;
+	}
+
+    private void OnOptionsClose()
+    {
+		_optionsPopup.Closed -= OnOptionsClose;
+		_pauseManager.SetPause(false);
+	}
+
 }

@@ -27,11 +27,6 @@ public class UIUltimate : MonoBehaviour , IPointerClickHandler{
 		_clickText.enabled = _playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana;
 	}
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
 	private void OnUltimateStateChanged(int mana)
     {
 		_playerUltimate.value = _playerStats.Mana.CurrentMana / (float)_playerStats.Mana.MaxMana;
@@ -42,5 +37,10 @@ public class UIUltimate : MonoBehaviour , IPointerClickHandler{
 	public void OnPointerClick(PointerEventData eventData)
     {
 		UltimateClicked.Invoke();
+	}
+
+	public void OnDisable()
+    {
+		_playerStats.Mana.CurrentManaChanged -= OnUltimateStateChanged;
 	}
 }

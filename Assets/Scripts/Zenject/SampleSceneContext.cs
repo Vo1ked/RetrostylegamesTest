@@ -16,6 +16,9 @@ public class SampleSceneContext : MonoInstaller{
         Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
         Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<UiManager>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<PauseManager>().AsSingle();
+        Container.Bind<Score>().AsSingle();
 
     }
 }

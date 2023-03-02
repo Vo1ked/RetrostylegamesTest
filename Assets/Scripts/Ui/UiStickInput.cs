@@ -46,6 +46,6 @@ public class UiStickInput : MonoBehaviour, IPlayerInput
         _moveStick.OnPositionChanged -= OnChangeDirection;
         _rotateStick.OnPositionChanged -= OnChangeRotation;
         _fireButton.onClick.RemoveAllListeners();
-
+        _ultimate.UltimateClicked -= OnUltimateClick;
     }
 }
