@@ -28,7 +28,7 @@ public class Heals
         get { return _currentHeals; }
         set
         {
-            _currentHeals = value;
+            _currentHeals = Mathf.Clamp(value, 0, MaxHeals);
             HealsChanged?.Invoke(_currentHeals);
         }
     }
@@ -46,8 +46,7 @@ public class Mana
         get { return _currentMana; }
         set
         {
-            _currentMana = Mathf.Min(value, MaxMana);
-            Debug.LogError(_currentMana);
+            _currentMana = Mathf.Clamp(value, 0, MaxMana);
             CurrentManaChanged?.Invoke(_currentMana);
         }
     }

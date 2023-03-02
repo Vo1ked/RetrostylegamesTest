@@ -12,8 +12,8 @@ public class UIUltimate : MonoBehaviour , IPointerClickHandler{
 
 	[SerializeField] private Slider _playerUltimate;
 	[SerializeField] private Text _clickText;
-	private PlayerStats _playerStats;
 
+	private PlayerStats _playerStats;
 	[Inject]
 	private void Construct(PlayerStats playerStats)
 	{
@@ -24,7 +24,7 @@ public class UIUltimate : MonoBehaviour , IPointerClickHandler{
 	void Start () {
 		_playerStats.Mana.CurrentManaChanged += OnUltimateStateChanged;
 		_playerUltimate.value = _playerStats.Mana.CurrentMana / (float)_playerStats.Mana.MaxMana;
-
+		_clickText.enabled = _playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana;
 	}
 
 	// Update is called once per frame
@@ -35,9 +35,11 @@ public class UIUltimate : MonoBehaviour , IPointerClickHandler{
 	private void OnUltimateStateChanged(int mana)
     {
 		_playerUltimate.value = _playerStats.Mana.CurrentMana / (float)_playerStats.Mana.MaxMana;
+		_clickText.enabled = _playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana;
+
 	}
 
-    public void OnPointerClick(PointerEventData eventData)
+	public void OnPointerClick(PointerEventData eventData)
     {
 		UltimateClicked.Invoke();
 	}
