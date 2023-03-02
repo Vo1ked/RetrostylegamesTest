@@ -183,7 +183,6 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
     {
 		_playerStats.Heals.CurrentHeals -= hit.HealsDamage;
 		_playerStats.Mana.CurrentMana -= hit.ManaDamage;
-		Debug.LogError("Player Hited");
 	}
 
 	public void OnPause(bool isPause)

@@ -21,15 +21,19 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private int _enemyIndex;
     private PlayerStats _playerStats;
     private IPlayerInput _input;
+    private Score _score;
+
     [Inject]
     private void Construct(ISpawnPoisition spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
-        IPlayerInput input)
+        IPlayerInput input, Score score)
     {
         _spawnPoisition = spawnPoisition;
         _pauseManager = pauseManager;
         _container = container;
         _playerStats = playerStats;
         _input = input;
+        _score = score;
+
         _input.Ultimate += OnUltimate;
         pauseManager.SubscribeHandler(this);
     }
@@ -42,6 +46,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
             foreach (Enemy enemy in enemyToDestory)
             {
                 Destroy(enemy);
+                _score.CurrentScore++;
             }
             _playerStats.Mana.CurrentMana = 0;
         }
@@ -118,6 +123,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private void OnEnemyKIll(Enemy enemy)
     {
         _playerStats.Mana.CurrentMana += enemy.EnemyStats.ManaAtkill;
+        _score.CurrentScore++;
         Destroy(enemy);
     }
 
