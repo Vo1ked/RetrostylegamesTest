@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 4260850122123384}
   - component: {fileID: 33190570999156292}
   - component: {fileID: 23982126128081724}
-  - component: {fileID: 136394815596717650}
   - component: {fileID: 136615974073520212}
   - component: {fileID: 195996944806955076}
   - component: {fileID: 114318063054421580}
@@ -146,19 +145,6 @@ MonoBehaviour:
   CurrentHeals: 0
   _agent: {fileID: 195996944806955076}
   _bulletSpawnPoint: {fileID: 4051140009247412}
---- !u!136 &136394815596717650
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1144119591558170}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!136 &136615974073520212
 CapsuleCollider:
   m_ObjectHideFlags: 1

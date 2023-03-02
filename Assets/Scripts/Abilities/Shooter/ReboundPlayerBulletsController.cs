@@ -38,7 +38,7 @@ public class ReboundPlayerBulletsController : BulletsController
     protected override void Hit(Bullet bullet, IDamageble damageble)
     {
         damageble.Damage(_bulletsStats.HitInfo);
-
+        Debug.Log("_bulletsStats.HitInfo" + _bulletsStats.HitInfo.HealsDamage);
         if (_reboundedBullets.Contains(bullet))
         {
 
