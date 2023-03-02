@@ -43,15 +43,13 @@ public class BulletsController : ScriptableObject, IPauseHandler
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
         _spawnedBullet.Shooter = shooter;
         _spawnedBullets.Add(_spawnedBullet);
-       Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
+       //Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
 
         Move(_spawnedBullet);
     }
 
     protected virtual void OnCollision(Bullet bullet,Collider other)
     {
-        Debug.LogError($"OnCollision  Bullet {bullet.name} Shotter = {other.name}");
-
         var hit = other.GetComponent<IDamageble>();
         if (hit == null)
         {

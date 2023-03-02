@@ -6,6 +6,7 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
     public event Action<Vector2> Direction = (Vector2) => { };
     public event Action<Vector2> Rotation = (Vector2) => { };
     public event Action Fire = () => { };
+    public event Action Ultimate = () => { };
 
     private PauseManager _pauseManager;
 
@@ -57,6 +58,9 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput {
         {
             Fire.Invoke();
         }
-
+        if (Input.GetButtonDown("Fire2"))
+        {
+            Ultimate.Invoke();
+        }
     }
 }

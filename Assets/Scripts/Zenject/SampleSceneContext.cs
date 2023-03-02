@@ -17,6 +17,5 @@ public class SampleSceneContext : MonoInstaller{
         Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
 
-       // Container.Bind<Shooter>().FromInstance(_shooter).AsSingle();
     }
 }

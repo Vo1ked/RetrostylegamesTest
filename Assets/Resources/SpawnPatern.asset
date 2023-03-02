@@ -13,12 +13,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DelayBeforeFirstSpawn: 1
   StartSpawnDelay: 5
-  SpawnDelayChangeStep: 0.25
+  SpawnDelayChangeStep: 0.1
   MinSpawnDelayRate: 2
   EnemyMultplierSpawnRate: 1.1
   MaxEnemyMultplierSpawnRate: 99
   enemies:
-  - EnemyStats: {fileID: 11400000, guid: e2daa63baee25a24585d2458d9673e31, type: 2}
-    BaseSpawnCount: 1
   - EnemyStats: {fileID: 11400000, guid: 5201977322bba964d8521f66d0aaa789, type: 2}
     BaseSpawnCount: 4
+  - EnemyStats: {fileID: 11400000, guid: e2daa63baee25a24585d2458d9673e31, type: 2}
+    BaseSpawnCount: 1

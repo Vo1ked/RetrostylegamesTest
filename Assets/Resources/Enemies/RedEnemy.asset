@@ -17,5 +17,6 @@ MonoBehaviour:
   StartHeals: 50
   MoveSpeed: 1
   RotationSpeed: 150
+  ManaAtkill: 15
   Abilities:
   - {fileID: 11400000, guid: fcf68db62001c51468b02d0a2b05491b, type: 2}

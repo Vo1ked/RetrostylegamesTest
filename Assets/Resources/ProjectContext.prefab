@@ -81,4 +81,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerStats: {fileID: 11400000, guid: fa837d0a7af326d47aa94ff5f4b54c18, type: 2}
-  _shooter: {fileID: 11400000, guid: 9426eebfb387a6d4e8dbc8fd5abe69f4, type: 2}

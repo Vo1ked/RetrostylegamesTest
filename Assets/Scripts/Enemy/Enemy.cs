@@ -14,7 +14,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     [SerializeField] private Transform _bulletSpawnPoint;
 
     private Coroutine _moveCoroutine;
-    private EnemyStats _enemyStats;
+    public EnemyStats EnemyStats { get; private set; }
 
     private float _attackReloadTimeLeft;
     private Coroutine _reloadCoroutine;
@@ -38,16 +38,15 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
     public Vector3 GetSpawnPosition()
     {
-        Debug.LogError($"GetSpawnPosition {_bulletSpawnPoint.position} Enemy {name}");
         return _bulletSpawnPoint.position;
     }
 
     public void Init(EnemyStats stats)
     {
-        _enemyStats =  stats;
-        _agent.speed = _enemyStats.MoveSpeed;
-        _agent.angularSpeed = _enemyStats.RotationSpeed;
-        CurrentHeals = _enemyStats.StartHeals;
+        EnemyStats =  stats;
+        _agent.speed = EnemyStats.MoveSpeed;
+        _agent.angularSpeed = EnemyStats.RotationSpeed;
+        CurrentHeals = EnemyStats.StartHeals;
 
         StartMove();
         Attack();
@@ -100,7 +99,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     private void Attack()
     {
         List<Ability> abilities = new List<Ability>();
-        if (!Ability.AbilityCheck(_enemyStats.Abilities, Specialization.Attack, ref abilities))
+        if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Attack, ref abilities))
         {
             return;
         }
@@ -143,7 +142,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     {
         _attackReloadTimeLeft = timer;
 
-        if (_attackReloadTimeLeft > 0)
+        while (_attackReloadTimeLeft > 0)
         {
             yield return null;
             _attackReloadTimeLeft -= Time.deltaTime;

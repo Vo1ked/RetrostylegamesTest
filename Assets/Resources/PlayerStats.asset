@@ -11,10 +11,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4aa16c72c43ac794d9ac4e682d95f23b, type: 3}
   m_Name: PlayerStats
   m_EditorClassIdentifier: 
-  Heals: 100
-  StartHealsCount: 100
-  UltimateCapacity: 100
-  StartUltimateCount: 50
+  Heals:
+    MaxHeals: 100
+    StartHeals: 100
+  Mana:
+    MaxMana: 100
+    StartMana: 50
   MoveSpeed: 2
   MaxMoveSpped: 3
   RotationSpeed: 2

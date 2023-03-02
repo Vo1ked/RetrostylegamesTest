@@ -19,14 +19,33 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private PauseManager _pauseManager;
     private DiContainer _container;
     private int _enemyIndex;
-
+    private PlayerStats _playerStats;
+    private IPlayerInput _input;
     [Inject]
-    private void Construct(ISpawnPoisition spawnPoisition, PauseManager pauseManager, Player player,DiContainer container)
+    private void Construct(ISpawnPoisition spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
+        IPlayerInput input)
     {
         _spawnPoisition = spawnPoisition;
         _pauseManager = pauseManager;
         _container = container;
+        _playerStats = playerStats;
+        _input = input;
+        _input.Ultimate += OnUltimate;
         pauseManager.SubscribeHandler(this);
+    }
+
+    private void OnUltimate()
+    {
+        if (_playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana)
+        {
+            var enemyToDestory = new List<Enemy>(_spawnedEnemies);
+            foreach (Enemy enemy in enemyToDestory)
+            {
+                Destroy(enemy);
+            }
+            _playerStats.Mana.CurrentMana = 0;
+        }
+
     }
 
     void Start()
@@ -92,18 +111,17 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
         if (enemy.CurrentHeals < 1)
         {
-            DestroyEnemy(enemy);
+            OnEnemyKIll(enemy);
         }
     }
 
-    private void DestroyEnemy(Enemy enemy)
+    private void OnEnemyKIll(Enemy enemy)
     {
-        _spawnedEnemies.Remove(enemy);
-        enemy.Damaged -= OnEnemyDamage;
-        Destroy(enemy.gameObject);
+        _playerStats.Mana.CurrentMana += enemy.EnemyStats.ManaAtkill;
+        Destroy(enemy);
     }
 
-    public void SelfDestroy(Enemy enemy)
+    public void Destroy(Enemy enemy)
     {
         _spawnedEnemies.Remove(enemy);
         enemy.Damaged -= OnEnemyDamage;

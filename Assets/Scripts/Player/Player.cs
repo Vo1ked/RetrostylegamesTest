@@ -29,10 +29,6 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 	private Coroutine _rotateCoroutine;
 	private Coroutine _reloadCoroutine;
 
-
-	public int PlayerHeals { get; private set; }
-	public int PlayerMana { get; private set; }
-
 	private IPlayerInput _input;
 	private ISpawnPoisition _spawnPoisition;
 	[Inject]
@@ -50,6 +46,8 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 	private void Awake()
 	{
 		_rigidbody = GetComponent<Rigidbody>();
+		_playerStats.Heals.CurrentHeals = _playerStats.Heals.StartHeals;
+		_playerStats.Mana.CurrentMana = _playerStats.Mana.StartMana;
 	}
 
 	private void Start()
@@ -183,8 +181,8 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 
     public void Damage(HitInfo hit)
     {
-		PlayerHeals -= hit.HealsDamage;
-		PlayerMana -= hit.ManaDamage;
+		_playerStats.Heals.CurrentHeals -= hit.HealsDamage;
+		_playerStats.Mana.CurrentMana -= hit.ManaDamage;
 		Debug.LogError("Player Hited");
 	}
 

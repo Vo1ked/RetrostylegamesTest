@@ -7,13 +7,17 @@ using Zenject;
 public class UiManager : MonoBehaviour {
 
 	[SerializeField] private Button _options;
-    private PauseManager _pauseManager;
+	[SerializeField] private Text playerHeals;
 
 
-    [Inject]
-	private void Construct(PauseManager pauseManager)
+
+	private PauseManager _pauseManager;
+	private Score _score;
+	[Inject]
+	private void Construct(PauseManager pauseManager,Score score)
 	{
 		_pauseManager = pauseManager;
+		_score = score;
 	}
 	// Use this for initialization
 	void Start () {

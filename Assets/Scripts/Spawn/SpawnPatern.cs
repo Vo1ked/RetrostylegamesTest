@@ -19,5 +19,4 @@ public class EnemyToSpawn
 {
 	public EnemyStats EnemyStats;
 	public int BaseSpawnCount;
-
 }

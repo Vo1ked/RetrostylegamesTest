@@ -1,15 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
+using System;
 
 [CreateAssetMenu(fileName = "PlayerStats", menuName = "My Game/PlayerStats")]
 public class PlayerStats : ScriptableObject {
 
-    public int Heals;
-    public int StartHealsCount;
+    public Heals Heals;
     [Space]
-    public int UltimateCapacity;
-    public int StartUltimateCount;
+    public Mana Mana;
     [Space]
     public float MoveSpeed;
     public float MaxMoveSpped;
@@ -18,4 +16,41 @@ public class PlayerStats : ScriptableObject {
     public float MaxDownRotation = 40;
 
     public List<Ability> Abilities;
+}
+[Serializable]
+public class Heals
+{
+    public int MaxHeals;
+    public int StartHeals;
+    [NonSerialized] private int _currentHeals;
+    public int CurrentHeals
+    {
+        get { return _currentHeals; }
+        set
+        {
+            _currentHeals = value;
+            HealsChanged?.Invoke(_currentHeals);
+        }
+    }
+    public event Action<int> HealsChanged;
+}
+[Serializable]
+public class Mana
+{
+    public int MaxMana;
+    public int StartMana;
+    [System.NonSerialized] private int _currentMana;
+
+    public int CurrentMana
+    {
+        get { return _currentMana; }
+        set
+        {
+            _currentMana = Mathf.Min(value, MaxMana);
+            Debug.LogError(_currentMana);
+            CurrentManaChanged?.Invoke(_currentMana);
+        }
+    }
+    public event Action<int> CurrentManaChanged;
+
 }

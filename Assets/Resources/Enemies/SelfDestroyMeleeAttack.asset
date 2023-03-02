@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: SelfDestroyMeleeAttack
   m_EditorClassIdentifier: 
   ReloadTime: 1
-  Range: 3
+  Range: 0.3
   HitInfo:
     _healsDamage: 15
     _manaDamage: 0

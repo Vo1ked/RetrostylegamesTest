@@ -13,5 +13,7 @@ public class EnemyStats : ScriptableObject {
 	public float MoveSpeed;
 	public float RotationSpeed;
 	[Space]
+	public int ManaAtkill;
+	[Space]
 	public List<Ability> Abilities;
 }

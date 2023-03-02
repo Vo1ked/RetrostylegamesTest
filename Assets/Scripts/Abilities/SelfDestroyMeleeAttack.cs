@@ -23,20 +23,14 @@ public class SelfDestroyMeleeAttack : Ability, IAttackAbillity {
 
     public override void Execute(GameObject user, params object[] parameters)
     {
-        Debug.LogError($"SelfDestroyMeleeAttack {user.name}");
         RaycastHit hit;
         if (Physics.Raycast(user.transform.position, user.transform.forward, out hit, Range))
         {
-
             var damageble = hit.transform.GetComponent<IDamageble>();
-            Debug.LogError($"SelfDestroyMeleeAttack 1 {hit.collider.name}  damageble {damageble == null} enemy  {user.name}");
-
             if (damageble != null)
             {
-                Debug.LogError($"SelfDestroyMeleeAttack 2{user.name}");
-
                 damageble.Damage(HitInfo);
-                _enemySpawner.SelfDestroy(user.GetComponent<Enemy>());
+                _enemySpawner.Destroy(user.GetComponent<Enemy>());
             }
         }
     }
