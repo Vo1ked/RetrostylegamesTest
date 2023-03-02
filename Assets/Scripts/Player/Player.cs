@@ -9,6 +9,9 @@ using Zenject;
 public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 {
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
+	/// <summary>
+	/// calls for remove links in ScriptableObject at scene reload  
+	/// </summary>
 	public event Action OnPlayerDestroy = () => { };
 
 	[SerializeField] private Transform _camera;

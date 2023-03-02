@@ -61,12 +61,12 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     {
         var pathUpdateDelay = 0.5f;
         var wait = new WaitForSeconds(pathUpdateDelay);
+        _agent.SetDestination(_player.transform.position);
+        yield return wait;
         if (_pauseManager.IsPaused)
         {
             yield break;
         }
-        _agent.SetDestination(_player.transform.position);
-        yield return wait;
         _moveCoroutine = StartCoroutine(Move());
     }
     public void OnPause(bool isPause)

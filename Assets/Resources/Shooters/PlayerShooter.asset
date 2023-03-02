@@ -11,5 +11,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f3ca8da5f9414543a505d9941584ecd, type: 3}
   m_Name: PlayerShooter
   m_EditorClassIdentifier: 
-  Bullet: {fileID: 11400000, guid: 9403f5a8d38c1394d84fb83db5dfb0ed, type: 2}
   ReloadTime: 0.3
+  Range: 9999
+  Bullet: {fileID: 11400000, guid: 8da4cf0ccdf2255468b3c8918dc339ee, type: 2}

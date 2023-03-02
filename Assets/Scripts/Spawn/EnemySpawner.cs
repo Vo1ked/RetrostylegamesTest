@@ -53,6 +53,26 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
     }
 
+    public Enemy GetNearestEnemy(Vector3 position)
+    {
+        if (_spawnedEnemies.Count < 1)
+        {
+            return null;
+        }
+        var distance = Mathf.Infinity;
+        Enemy nearestEnemy = null;
+        foreach (Enemy enemy in _spawnedEnemies)
+        {
+            var currentDistance = Vector3.Distance(position, enemy.transform.position);
+            if (currentDistance < distance)
+            {
+                distance = currentDistance;
+                nearestEnemy = enemy;
+            }
+        }
+        return nearestEnemy;
+    }
+
     void Start()
     {
         var container = FindObjectOfType<SceneContext>().Container;
