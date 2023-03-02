@@ -29,7 +29,7 @@ public class SpawnByRandomRadius : ISpawnPoisition {
     private bool ValidatePosition(Vector3 position)
     {
         RaycastHit hit;
-        return !Physics.SphereCast(position, 1, Vector3.zero, out hit);
+        return !Physics.SphereCast(position, 3, Vector3.zero, out hit);
     }
 
 }

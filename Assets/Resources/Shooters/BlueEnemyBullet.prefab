@@ -22,10 +22,10 @@ GameObject:
   - component: {fileID: 33370422627874328}
   - component: {fileID: 23430771499680502}
   - component: {fileID: 135742864742956300}
+  - component: {fileID: 54484763775802766}
   - component: {fileID: 114399350697542128}
   - component: {fileID: 114281401858347170}
-  - component: {fileID: 54484763775802766}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: BlueEnemyBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,8 +39,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1099231466001560}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.263, y: 0.14199999, z: -1.72}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0

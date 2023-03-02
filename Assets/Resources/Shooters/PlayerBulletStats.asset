@@ -14,7 +14,7 @@ MonoBehaviour:
   name: PlayerBullet
   Bullet: {fileID: 114932698647415610, guid: 89dc911d0dd3de542a80e9bd85c2dfea, type: 2}
   Shooter: {fileID: 0}
-  Speed: 6
+  Speed: 10
   HitInfo:
     _healsDamage: 25
     _manaDamage: 0

@@ -12,12 +12,13 @@ public class BulletsController : ScriptableObject, IPauseHandler
     [SerializeField] private Vector3 _spawnOffset;
 
     [SerializeField] protected BulletsStats _bulletsStats;
-    protected List<Bullet> _spawnedBullets;
+    [NonSerialized] protected List<Bullet> _spawnedBullets = new List<Bullet>();
 
     protected BulletContainer _bulletContainer;
     protected CoroutineRunner _coroutineRunner;
     protected static float _autoDeleteTimer = 60;
     protected PauseManager _pauseManager;
+    [NonSerialized] protected int _bulletIndex;
 
     [Inject]
     private void Construct(BulletContainer bulletContainer, CoroutineRunner coroutineRunner, PauseManager pauseManager)
@@ -26,10 +27,8 @@ public class BulletsController : ScriptableObject, IPauseHandler
         _coroutineRunner = coroutineRunner;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
-        _spawnedBullets = new List<Bullet>();
+
     }
-
-
 
     public virtual void Spawn()
     {
@@ -40,10 +39,12 @@ public class BulletsController : ScriptableObject, IPauseHandler
         }
         var spawnPosition = Shooter.GetComponent<IBulletSpawn>().GetSpawnPosition();
         var _spawnedBullet = GameObject.Instantiate<Bullet>(_bulletsStats.Bullet, spawnPosition + _spawnOffset, Quaternion.identity, _bulletContainer.transform);
-        _spawnedBullet.name = $"{_bulletsStats.name}_{Shooter.name}";
+        _spawnedBullet.name = $"{_bulletsStats.name}_{Shooter.name}({++_bulletIndex})";
         _spawnedBullet.Hited += OnCollision;
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
         _spawnedBullets.Add(_spawnedBullet);
+       // Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {Shooter.name} _bulletContainer = {_spawnedBullet.transform.parent.name}");
+
         Move(_spawnedBullet);
     }
 

@@ -17,15 +17,14 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
     private ISpawnPoisition _spawnPoisition;
     private PauseManager _pauseManager;
-    private Player _player;
     private DiContainer _container;
+    private int _enemyIndex;
 
     [Inject]
     private void Construct(ISpawnPoisition spawnPoisition, PauseManager pauseManager, Player player,DiContainer container)
     {
         _spawnPoisition = spawnPoisition;
         _pauseManager = pauseManager;
-        _player = player;
         _container = container;
         pauseManager.SubscribeHandler(this);
     }
@@ -53,9 +52,10 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         }
         foreach (EnemyToSpawn enemy in _spawnPatern.enemies)
         {
-            for (int i = 0; i <  GetEnemySpawnCount(enemy); i++)
+            for (int i = 0; i < GetEnemySpawnCount(enemy); i++)
             {
                 var currentEnemy = Instantiate<Enemy>(enemy.EnemyStats.enemy, _spawnPoisition.GetSpawnPosition(), Quaternion.identity, this.transform);
+                currentEnemy.gameObject.name = enemy.EnemyStats.name + ++_enemyIndex;
                 _container.Inject(currentEnemy);
                 _spawnedEnemies.Add(currentEnemy);
                 currentEnemy.Damaged += OnEnemyDamage;
@@ -87,6 +87,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private void OnEnemyDamage(Enemy enemy, HitInfo hit)
     {
         enemy.CurrentHeals -= hit.HealsDamage;
+
         if (enemy.CurrentHeals < 1)
         {
             DestroyEnemy(enemy);

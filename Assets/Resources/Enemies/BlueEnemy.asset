@@ -15,7 +15,7 @@ MonoBehaviour:
   enemy: {fileID: 114698093572227744, guid: 716736171df2ade4bbb0fbb530cfa63b, type: 2}
   Heals: 100
   StartHeals: 100
-  MoveSpeed: 1
+  MoveSpeed: 0.5
   RotationSpeed: 1
   Abilities:
   - {fileID: 11400000, guid: 4a2e2c50971bc2b45a35f9e0756843ca, type: 2}

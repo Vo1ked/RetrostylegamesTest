@@ -6,7 +6,7 @@ using UnityEngine;
 using Zenject;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
+public class Player : MonoBehaviour, IBulletSpawn, IDamageble
 {
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
 
@@ -18,13 +18,18 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
 
 	private Vector3 _direction;
 	private Vector3 _rotation;
-	private Coroutine _moveCoroutine;
-	private Coroutine _rotateCoroutine;
-
 	private float _angleHorizontal;
 	private float _angleVertical;
 	private Quaternion _originRotation;
 	private Quaternion _originCameraRotation;
+
+	private float _attackReloadTimeLeft;
+
+	private Coroutine _moveCoroutine;
+	private Coroutine _rotateCoroutine;
+	private Coroutine _reloadCoroutine;
+
+
 	public int PlayerHeals { get; private set; }
 	public int PlayerMana { get; private set; }
 
@@ -114,6 +119,11 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
 
 	private void Attack()
 	{
+		if (_attackReloadTimeLeft > 0)
+		{
+			return;
+		}
+
 		List<Ability> abilities = new List<Ability>();
 		if (!Ability.AbilityCheck(_playerStats.Abilities, Specialization.Attack, ref abilities))
 		{
@@ -123,7 +133,9 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
 
 		if (overrideAbility != null)
 		{
+			var attackAbility = ((IAttackAbillity)overrideAbility).ReloadTime;
 			overrideAbility.Execute(gameObject, this);
+			_reloadCoroutine = StartCoroutine(Reload(attackAbility));
 			abilities.Remove(overrideAbility);
 		}
 
@@ -132,6 +144,18 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
 			ability.Execute(gameObject, this);
 		}
 
+	}
+
+	private IEnumerator Reload(float timer)
+	{
+		_attackReloadTimeLeft = timer;
+
+		while (_attackReloadTimeLeft > 0)
+		{
+			yield return null;
+			_attackReloadTimeLeft -= Time.deltaTime;
+		}
+		_reloadCoroutine = null;
 	}
 
 	private void OnMoveRotateChanged(Vector2 rotation)
@@ -161,10 +185,22 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IAttack
     {
 		PlayerHeals -= hit.HealsDamage;
 		PlayerMana -= hit.ManaDamage;
+		Debug.LogError("Player Hited");
 	}
 
-    public void TryAttack()
-    {
+	public void OnPause(bool isPause)
+	{
+		if (isPause)
+		{
+			if (_reloadCoroutine == null)
+				return;
 
-    }
+			StopCoroutine(_reloadCoroutine);
+			_reloadCoroutine = null;
+		}
+		else
+		{
+			_reloadCoroutine = StartCoroutine(Reload(_attackReloadTimeLeft));
+		}
+	}
 }

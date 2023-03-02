@@ -16,10 +16,10 @@ public class PauseManager {
 
 	public void UnsubscribeHandler(IPauseHandler pauseHandler)
     {
-		_pauseHandlers.Remove(pauseHandler);
+        _pauseHandlers.Remove(pauseHandler);
     }
 
-	public void SetPause(bool isPaused)
+    public void SetPause(bool isPaused)
     {
 		IsPaused = isPaused;
         foreach (IPauseHandler handler  in _pauseHandlers)

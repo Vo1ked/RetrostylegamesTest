@@ -14,7 +14,7 @@ MonoBehaviour:
   name: BlueEnemyBullet
   Bullet: {fileID: 114281401858347170, guid: db016b727c121994fbfbe4fb7f33b80f, type: 2}
   Shooter: {fileID: 0}
-  Speed: 1
+  Speed: 3
   HitInfo:
     _healsDamage: 0
     _manaDamage: 25

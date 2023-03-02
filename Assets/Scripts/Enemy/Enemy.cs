@@ -5,17 +5,19 @@ using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
 
-public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, IAttack
+public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 {
     public event System.Action<Enemy, HitInfo> Damaged = (Enemy, HitInfo) => { };
     public int CurrentHeals;
-    public EnemyStats _enemyStats;
 
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private Transform _bulletSpawnPoint;
 
     private Coroutine _moveCoroutine;
+    private EnemyStats _enemyStats;
 
+    private float _attackReloadTimeLeft;
+    private Coroutine _reloadCoroutine;
 
     private PauseManager _pauseManager;
     private Player _player;
@@ -40,13 +42,13 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     public void Init(EnemyStats stats)
     {
-        _enemyStats = stats;
-        name = _enemyStats.name;
-        CurrentHeals = _enemyStats.StartHeals;
+        _enemyStats =  stats;
         _agent.speed = _enemyStats.MoveSpeed;
         _agent.angularSpeed = _enemyStats.RotationSpeed;
+        CurrentHeals = _enemyStats.StartHeals;
 
         StartMove();
+        Attack();
     }
 
     public void StartMove()
@@ -66,22 +68,38 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     {
         if (isPause)
         {
-            if (_moveCoroutine == null)
-                return;
+            if (_moveCoroutine != null)
+            {
+                StopCoroutine(_moveCoroutine);
+                _moveCoroutine = null;
+            }
 
-            StopCoroutine(_moveCoroutine);
-            _agent.isStopped = true;
-            _moveCoroutine = null;
+            if (_reloadCoroutine != null)
+            {
+                StopCoroutine(_reloadCoroutine);
+                _reloadCoroutine = null;
+            }
         }
         else
         {
-            _agent.isStopped = false;
             _moveCoroutine = StartCoroutine(Move());
+            if (_attackReloadTimeLeft > 0)
+            {
+                _reloadCoroutine = StartCoroutine(Reload(_attackReloadTimeLeft));
+            }
+
+        }
+        if (_agent != null)
+        {
+            _agent.isStopped = isPause;
         }
     }
 
     private void Attack()
     {
+        if (_attackReloadTimeLeft > 0)
+            return;
+
         List<Ability> abilities = new List<Ability>();
         if (!Ability.AbilityCheck(_enemyStats.Abilities, Specialization.Attack, ref abilities))
         {
@@ -91,7 +109,10 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
         if (overrideAbility != null)
         {
+            var attackAbility = (overrideAbility as IAttackAbillity).ReloadTime;
             overrideAbility.Execute(gameObject, this);
+            _reloadCoroutine = StartCoroutine(Reload(attackAbility));
+
             abilities.Remove(overrideAbility);
         }
 
@@ -99,11 +120,18 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         {
             ability.Execute(gameObject, this);
         }
-
     }
 
-    public void TryAttack()
+    private IEnumerator Reload(float timer)
     {
+        _attackReloadTimeLeft = timer;
+
+        while (_attackReloadTimeLeft > 0)
+        {
+            yield return null;
+            _attackReloadTimeLeft -= Time.deltaTime;
+        }
+        _reloadCoroutine = null;
         Attack();
     }
 
@@ -113,6 +141,11 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         if (_moveCoroutine != null)
         {
             StopCoroutine(_moveCoroutine);
+        }
+
+        if (_reloadCoroutine != null)
+        {
+            StopCoroutine(_reloadCoroutine);
         }
 
     }

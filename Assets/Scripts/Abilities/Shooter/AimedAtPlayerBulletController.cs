@@ -1,25 +1,44 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
 [CreateAssetMenu(fileName = "AimedToPlayerBulletController", menuName = "My Game/Shooter/AimBulletController")]
 public class AimedAtPlayerBulletController : BulletsController {
 
-    private Player _player; 
+    private Player _player;
+    [System.NonSerialized] private List<Bullet> _loseTargetBullets = new List<Bullet>();
     [Inject]
     private void Construct(Player player)
     {
         _player = player;
         _player.PlayerStartTeleport += OnPlayerTeleported;
+
     }
 
     private void OnPlayerTeleported(Vector3 lastPosition)
     {
-        foreach (Bullet bullet in _spawnedBullets)
+        var bulletsToRemove = new List<Bullet>(_spawnedBullets);
+        foreach (Bullet bullet in _loseTargetBullets)
+        {
+            bulletsToRemove.Remove(bullet);
+        }
+
+        foreach (Bullet bullet in bulletsToRemove)
         {
             _coroutineRunner.StopCoroutine(bullet.MoveCoroutine);
+            _loseTargetBullets.Add(bullet);
+            var rotation = Quaternion.LookRotation( bullet.transform.position -_player.transform.position);
+            bullet.transform.rotation = rotation;
             bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
         }
+    }
+
+    protected override void Destroy(Bullet bullet)
+    {
+        base.Destroy(bullet);
+        _loseTargetBullets.Remove(bullet);
     }
 
     public override void Move(Bullet bullet)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IDamageble {
-
 	void Damage(HitInfo hit);
 }
 
