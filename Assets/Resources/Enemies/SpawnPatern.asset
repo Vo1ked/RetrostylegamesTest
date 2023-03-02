@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a95205f4975b98142888c3638e85f75b, type: 3}
-  m_Name: HardSpawnPatern
+  m_Name: SpawnPatern
   m_EditorClassIdentifier: 
   DelayBeforeFirstSpawn: 1
   StartSpawnDelay: 5
@@ -20,3 +20,5 @@ MonoBehaviour:
   enemies:
   - EnemyStats: {fileID: 11400000, guid: e2daa63baee25a24585d2458d9673e31, type: 2}
     BaseSpawnCount: 1
+  - EnemyStats: {fileID: 11400000, guid: 5201977322bba964d8521f66d0aaa789, type: 2}
+    BaseSpawnCount: 4

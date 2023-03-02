@@ -3,8 +3,8 @@ using UnityEngine;
 
 public abstract class Ability : ScriptableObject
 {
-    public Specialization Specialization { get; protected set; }
-    public WorkType WorkType { get; protected set; }
+    public virtual Specialization Specialization { get; protected set; }
+    public virtual WorkType WorkType { get; protected set; }
     public abstract void Execute(GameObject user, params object[] parameters);
 
     public static bool AbilityCheck(List<Ability> allabilities, Specialization specialization, ref List<Ability> abilities)

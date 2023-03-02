@@ -2,10 +2,11 @@
 
 public class Bullet : MonoBehaviour {
 
-	[SerializeField] private CollisionEventRepeater _collisionEventRepeater;
 	public event System.Action<Bullet, Collider> Hited;
 	public Coroutine MoveCoroutine;
 	public float TimeToDeleteLeft;
+	[HideInInspector] public GameObject Shooter;
+	[SerializeField] private CollisionEventRepeater _collisionEventRepeater;
 
 	public void OnEnable()
     {

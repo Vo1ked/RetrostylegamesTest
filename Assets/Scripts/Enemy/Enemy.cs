@@ -18,6 +18,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
     private float _attackReloadTimeLeft;
     private Coroutine _reloadCoroutine;
+    private IAttackAbillity _attackAbillity;
 
     private PauseManager _pauseManager;
     private Player _player;
@@ -37,7 +38,8 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
     public Vector3 GetSpawnPosition()
     {
-       return _bulletSpawnPoint.position;
+        Debug.LogError($"GetSpawnPosition {_bulletSpawnPoint.position} Enemy {name}");
+        return _bulletSpawnPoint.position;
     }
 
     public void Init(EnemyStats stats)
@@ -85,7 +87,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
             _moveCoroutine = StartCoroutine(Move());
             if (_attackReloadTimeLeft > 0)
             {
-                _reloadCoroutine = StartCoroutine(Reload(_attackReloadTimeLeft));
+                _reloadCoroutine = StartCoroutine(WaitAttackRange(_attackReloadTimeLeft));
             }
 
         }
@@ -97,9 +99,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
     private void Attack()
     {
-        if (_attackReloadTimeLeft > 0)
-            return;
-
         List<Ability> abilities = new List<Ability>();
         if (!Ability.AbilityCheck(_enemyStats.Abilities, Specialization.Attack, ref abilities))
         {
@@ -109,9 +108,18 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
         if (overrideAbility != null)
         {
-            var attackAbility = (overrideAbility as IAttackAbillity).ReloadTime;
+            var attackAbillity = GetAttackAbillity(overrideAbility);
+            if (_attackReloadTimeLeft > 0)
+                return;
+            var distance = Vector3.Distance(_player.transform.position, transform.position);
+
+            if (distance > attackAbillity.AttackRange && _reloadCoroutine == null)
+            {
+                _reloadCoroutine = StartCoroutine(WaitAttackRange(attackAbillity.ReloadTime));
+                return;
+            }
             overrideAbility.Execute(gameObject, this);
-            _reloadCoroutine = StartCoroutine(Reload(attackAbility));
+            _reloadCoroutine = StartCoroutine(WaitAttackRange(attackAbillity.ReloadTime));
 
             abilities.Remove(overrideAbility);
         }
@@ -122,16 +130,30 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         }
     }
 
-    private IEnumerator Reload(float timer)
+    private IAttackAbillity GetAttackAbillity(Ability ability)
+    {
+        if (_attackAbillity != null)
+            return _attackAbillity;
+
+        
+        return _attackAbillity = ability as IAttackAbillity;
+    }
+
+    private IEnumerator WaitAttackRange(float timer)
     {
         _attackReloadTimeLeft = timer;
 
-        while (_attackReloadTimeLeft > 0)
+        if (_attackReloadTimeLeft > 0)
         {
             yield return null;
             _attackReloadTimeLeft -= Time.deltaTime;
         }
-        _reloadCoroutine = null;
+
+        var wait = new WaitForSeconds(0.5f);
+        while (Vector3.Distance(_player.transform.position, transform.position) > _attackAbillity.AttackRange)
+        {
+            yield return wait;
+        }
         Attack();
     }
 

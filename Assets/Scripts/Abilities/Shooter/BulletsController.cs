@@ -8,7 +8,6 @@ using System;
 [CreateAssetMenu(fileName = "BulletsController", menuName = "My Game/Shooter/BulletsController")]
 public class BulletsController : ScriptableObject, IPauseHandler
 {
-    [HideInInspector] public GameObject Shooter;
     [SerializeField] private Vector3 _spawnOffset;
 
     [SerializeField] protected BulletsStats _bulletsStats;
@@ -30,26 +29,29 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
     }
 
-    public virtual void Spawn()
+    public virtual void Spawn(GameObject shooter)
     {
         if (_bulletsStats.Bullet == null)
         {
             Debug.LogError($"Bullet {_bulletsStats.name} did`t contain  bullet");
             return;
         }
-        var spawnPosition = Shooter.GetComponent<IBulletSpawn>().GetSpawnPosition();
+        var spawnPosition = shooter.GetComponent<IBulletSpawn>().GetSpawnPosition();
         var _spawnedBullet = GameObject.Instantiate<Bullet>(_bulletsStats.Bullet, spawnPosition + _spawnOffset, Quaternion.identity, _bulletContainer.transform);
-        _spawnedBullet.name = $"{_bulletsStats.name}_{Shooter.name}({++_bulletIndex})";
+        _spawnedBullet.name = $"{_bulletsStats.name}_{shooter.name}({++_bulletIndex})";
         _spawnedBullet.Hited += OnCollision;
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
+        _spawnedBullet.Shooter = shooter;
         _spawnedBullets.Add(_spawnedBullet);
-       // Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {Shooter.name} _bulletContainer = {_spawnedBullet.transform.parent.name}");
+       Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
 
         Move(_spawnedBullet);
     }
 
     protected virtual void OnCollision(Bullet bullet,Collider other)
     {
+        Debug.LogError($"OnCollision  Bullet {bullet.name} Shotter = {other.name}");
+
         var hit = other.GetComponent<IDamageble>();
         if (hit == null)
         {
@@ -63,7 +65,7 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
     public virtual void Move(Bullet bullet)
     {
-        bullet.transform.LookAt(Shooter.transform);
+        bullet.transform.LookAt(bullet.Shooter.transform);
         bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
     }
 

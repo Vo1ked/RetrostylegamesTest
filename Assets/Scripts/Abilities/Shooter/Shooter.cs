@@ -6,25 +6,28 @@ using Zenject;
 [CreateAssetMenu(fileName = "Shooter", menuName = "My Game/Ability/Shooter")]
 public class Shooter : Ability, IAttackAbillity
 {
+    public override Specialization Specialization => Specialization.Attack;
+    public override WorkType WorkType => WorkType.@override;
     [Space]
-    [SerializeField] private BulletsController Bullet;
+
     [SerializeField] private float ReloadTime;
+    [SerializeField] private float Range = 9999;
 
     float IAttackAbillity.ReloadTime => ReloadTime;
+    float IAttackAbillity.AttackRange => Range;
+    
+
+    [SerializeField] private BulletsController Bullet;
 
     [Inject]
     private void Construct(DiContainer container)
     {
         container.Inject(Bullet);
-
-        Specialization = Specialization.Attack;
-        WorkType = WorkType.@override;
     }
 
     public override void Execute(GameObject user, params object[] parameters)
     {
-        Bullet.Shooter = user;
-        Bullet.Spawn();
+        Bullet.Spawn(user);
     }
 
 

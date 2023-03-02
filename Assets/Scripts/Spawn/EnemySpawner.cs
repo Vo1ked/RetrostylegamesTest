@@ -54,7 +54,9 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         {
             for (int i = 0; i < GetEnemySpawnCount(enemy); i++)
             {
-                var currentEnemy = Instantiate<Enemy>(enemy.EnemyStats.enemy, _spawnPoisition.GetSpawnPosition(), Quaternion.identity, this.transform);
+                var currentEnemy = Instantiate<Enemy>(enemy.EnemyStats.enemy,
+                    _spawnPoisition.GetSpawnPosition() + Vector3.up * enemy.EnemyStats.enemy.transform.position.y
+                    , Quaternion.identity, this.transform);
                 currentEnemy.gameObject.name = enemy.EnemyStats.name + ++_enemyIndex;
                 _container.Inject(currentEnemy);
                 _spawnedEnemies.Add(currentEnemy);
@@ -95,6 +97,13 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     }
 
     private void DestroyEnemy(Enemy enemy)
+    {
+        _spawnedEnemies.Remove(enemy);
+        enemy.Damaged -= OnEnemyDamage;
+        Destroy(enemy.gameObject);
+    }
+
+    public void SelfDestroy(Enemy enemy)
     {
         _spawnedEnemies.Remove(enemy);
         enemy.Damaged -= OnEnemyDamage;
