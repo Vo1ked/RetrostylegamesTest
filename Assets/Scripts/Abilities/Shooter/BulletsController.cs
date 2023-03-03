@@ -113,11 +113,11 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
     public void OnPause(bool IsPause)
     {
+        if (_spawnedBullets.Count < 1)
+            return;
+
         if (IsPause)
         {
-            if (_spawnedBullets.Count < 1)
-                return;
-
             foreach (Bullet bullet in _spawnedBullets)
             {
                 if (bullet.MoveCoroutine != null)
@@ -129,14 +129,11 @@ public class BulletsController : ScriptableObject, IPauseHandler
         }
         else
         {
-            if (_spawnedBullets.Count < 1)
-                return;
-
             foreach (Bullet bullet in _spawnedBullets)
             {
                 if (bullet.MoveCoroutine == null)
                 {
-                    bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
+                    bullet.MoveCoroutine = _coroutineRunner.RunCoroutine(MoveForward(bullet));
                 }
             }
         }

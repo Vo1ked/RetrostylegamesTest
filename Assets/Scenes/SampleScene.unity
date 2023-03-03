@@ -104,12 +104,12 @@ NavMeshSettings:
     agentClimb: 0.4
     ledgeDropHeight: 0
     maxJumpAcrossDistance: 0
-    minRegionArea: 2
+    minRegionArea: 8
     manualCellSize: 0
     cellSize: 0.05
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 1
+    accuratePlacement: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 23800000, guid: 7e2f3c12cbca3b6479eb9cd9b9f3c9e7, type: 2}

@@ -5,16 +5,19 @@ using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
 
-public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
+public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, IMovable
 {
     public event System.Action<Enemy, HitInfo> Damaged = (Enemy, HitInfo) => { };
     public int CurrentHeals;
+    public EnemyStats EnemyStats { get; private set; }
+
+    public Coroutine Coroutine { get; set; }
+    public Rigidbody Rigidbody { get; private set; }
+    public Vector3 TargetPosition { get; set; }
+    public System.Action CompletedMove { get; set; }
 
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private Transform _bulletSpawnPoint;
-
-    private Coroutine _moveCoroutine;
-    public EnemyStats EnemyStats { get; private set; }
 
     private float _attackReloadTimeLeft;
     private Coroutine _reloadCoroutine;
@@ -31,6 +34,11 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         pauseManager.SubscribeHandler(this);
     }
 
+    private void Awake()
+    {
+        Rigidbody = GetComponent<Rigidbody>();
+    }
+
     public void Damage(HitInfo hit)
     {
         Damaged.Invoke(this, hit);
@@ -43,40 +51,71 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
 
     public void Init(EnemyStats stats)
     {
-        EnemyStats =  stats;
-        _agent.speed = EnemyStats.MoveSpeed;
-        _agent.angularSpeed = EnemyStats.RotationSpeed;
+        EnemyStats = stats;
         CurrentHeals = EnemyStats.StartHeals;
 
+        List<Ability> abilities = new List<Ability>();
+        if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Spawn, ref abilities))
+        {
+            _agent.speed = EnemyStats.MoveSpeed;
+            _agent.angularSpeed = EnemyStats.RotationSpeed;
+
+            StartMove();
+            Attack();
+            return;
+        }
+        var overrideAbility = abilities.First(abbility => abbility.WorkType == WorkType.@override);
+
+        if (overrideAbility != null)
+        {
+            CompletedMove += AfterCustomSpawnMove;
+            overrideAbility.Execute(gameObject);
+        }
+    }
+
+    private void AfterCustomSpawnMove()
+    {
         StartMove();
         Attack();
+        CompletedMove -= AfterCustomSpawnMove;
     }
 
     public void StartMove()
     {
-        _moveCoroutine = StartCoroutine(Move());
+        Coroutine = StartCoroutine(Move());
     }
 
     private IEnumerator Move()
     {
-        var pathUpdateDelay = 0.5f;
-        var wait = new WaitForSeconds(pathUpdateDelay);
-        _agent.SetDestination(_player.transform.position);
-        yield return wait;
-        if (_pauseManager.IsPaused)
+        List<Ability> abilities = new List<Ability>();
+        if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Move, ref abilities))
         {
+            var pathUpdateDelay = 0.5f;
+            var wait = new WaitForSeconds(pathUpdateDelay);
+            _agent.SetDestination(_player.transform.position);
+            yield return wait;
+            if (_pauseManager.IsPaused)
+            {
+                yield break;
+            }
+            Coroutine = StartCoroutine(Move());
             yield break;
         }
-        _moveCoroutine = StartCoroutine(Move());
+        var overrideAbility = abilities.First(abbility => abbility.WorkType == WorkType.@override);
+
+        if (overrideAbility != null)
+        {
+            overrideAbility.Execute(gameObject, this, Coroutine);
+        }
     }
     public void OnPause(bool isPause)
     {
         if (isPause)
         {
-            if (_moveCoroutine != null)
+            if (Coroutine != null)
             {
-                StopCoroutine(_moveCoroutine);
-                _moveCoroutine = null;
+                StopCoroutine(Coroutine);
+                Coroutine = null;
             }
 
             if (_reloadCoroutine != null)
@@ -87,19 +126,14 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
         }
         else
         {
-            if (_moveCoroutine == null)
+            if (Coroutine == null)
             {
-                _moveCoroutine = StartCoroutine(Move());
+                Coroutine = StartCoroutine(Move());
             }
             if (_attackReloadTimeLeft > 0 && _reloadCoroutine == null)
             {
                 _reloadCoroutine = StartCoroutine(WaitAttackRange(_attackReloadTimeLeft));
             }
-
-        }
-        if (_agent != null)
-        {
-            _agent.isStopped = isPause;
         }
     }
 
@@ -126,13 +160,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
             }
             overrideAbility.Execute(gameObject, this);
             _reloadCoroutine = StartCoroutine(WaitAttackRange(attackAbillity.ReloadTime));
-
-            abilities.Remove(overrideAbility);
-        }
-
-        foreach (Ability ability in abilities)
-        {
-            ability.Execute(gameObject, this);
         }
     }
 
@@ -175,10 +202,10 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler
     private void OnDestroy()
     {
         _pauseManager.UnsubscribeHandler(this);
-        if (_moveCoroutine != null)
+        if (Coroutine != null)
         {
-            StopCoroutine(_moveCoroutine);
-            _moveCoroutine = null;
+            StopCoroutine(Coroutine);
+            Coroutine = null;
         }
 
         if (_reloadCoroutine != null)

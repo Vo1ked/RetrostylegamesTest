@@ -42,8 +42,7 @@ public class AimedAtPlayerBulletController : BulletsController
                 bullet.MoveCoroutine = null;
             }
             _loseTargetBullets.Add(bullet);
-            var rotation = Quaternion.LookRotation( bullet.transform.position -_player.transform.position);
-            bullet.transform.rotation = rotation;
+            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - _player.transform.position); ;
             bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
         }
     }

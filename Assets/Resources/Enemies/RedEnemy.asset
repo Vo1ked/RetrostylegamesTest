@@ -20,3 +20,4 @@ MonoBehaviour:
   ManaAtkill: 15
   Abilities:
   - {fileID: 11400000, guid: fcf68db62001c51468b02d0a2b05491b, type: 2}
+  - {fileID: 11400000, guid: bf195ca613e86664da779a2b8fbe9b9e, type: 2}
