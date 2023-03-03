@@ -14,18 +14,28 @@ public class FlyAtSpawn : Ability, IPauseHandler
 	[SerializeField] private float _flyUpSpeed;
 	[SerializeField] private float _afterFlyUpBeforeMoveDelay;
 
+    private Player _player;
 	private List<IMovable> _movables = new List<IMovable>();
 	private CoroutineRunner _coroutineRunner;
 	private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(CoroutineRunner coroutineRunner, PauseManager pauseManager, Dispose dispose)
+	private void Construct(CoroutineRunner coroutineRunner, PauseManager pauseManager, Player player)
 	{
 		_coroutineRunner = coroutineRunner;
 		_pauseManager = pauseManager;
+        _player = player;
 		_pauseManager.SubscribeHandler(this);
 
-		dispose.OnDispose += () => _pauseManager.UnsubscribeHandler(this);
+        _player.OnPlayerDestroy += OnPlayerDestroy;
 	}
+
+	private void OnPlayerDestroy()
+	{
+		_player.OnPlayerDestroy -= OnPlayerDestroy;
+		_movables.Clear();
+		_pauseManager.UnsubscribeHandler(this);
+	}
+
 	public override void Execute(GameObject user, params object[] parameters)
     {
 		var movable = user.GetComponent<IMovable>();

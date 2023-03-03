@@ -8,11 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 470435b45e5a05c47996a11ee0ef098d, type: 3}
-  m_Name: SelfDestroyMeleeAttack
+  m_Script: {fileID: 11500000, guid: 194fd8c07056d2344aed0d13d77fbce4, type: 3}
+  m_Name: RedFlyToPlayer
   m_EditorClassIdentifier: 
-  ReloadTime: 0.1
-  Range: 0.4
-  HitInfo:
-    _healsDamage: 15
-    _manaDamage: 0
+  _flyUpSpeed: 1.5

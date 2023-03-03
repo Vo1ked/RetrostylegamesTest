@@ -11,7 +11,7 @@ public class AimedAtPlayerBulletController : BulletsController
     private Player _player;
     [System.NonSerialized] private List<Bullet> _loseTargetBullets = new List<Bullet>();
     [Inject]
-    private void Construct(Player player,Dispose dispose)
+    private void Construct(Player player)
     {
         _player = player;
         _player.PlayerStartTeleport += OnPlayerTeleported;
@@ -42,7 +42,7 @@ public class AimedAtPlayerBulletController : BulletsController
                 bullet.MoveCoroutine = null;
             }
             _loseTargetBullets.Add(bullet);
-            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - _player.transform.position); ;
+            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - _player.transform.position);
             bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
         }
     }

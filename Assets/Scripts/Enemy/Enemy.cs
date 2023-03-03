@@ -98,6 +98,11 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             {
                 yield break;
             }
+            if (Coroutine != null)
+            {
+                StopCoroutine(Coroutine);
+                Coroutine = null;
+            }
             Coroutine = StartCoroutine(Move());
             yield break;
         }
@@ -110,6 +115,11 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     }
     public void OnPause(bool isPause)
     {
+        if (_agent.enabled)
+        {
+            _agent.isStopped = isPause;
+        }
+
         if (isPause)
         {
             if (Coroutine != null)

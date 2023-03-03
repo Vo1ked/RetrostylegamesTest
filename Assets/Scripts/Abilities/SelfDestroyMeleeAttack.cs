@@ -14,18 +14,21 @@ public class SelfDestroyMeleeAttack : Ability, IAttackAbillity {
     float IAttackAbillity.ReloadTime => ReloadTime;
     float IAttackAbillity.AttackRange => Range;
 
+	private Player _player;
     private EnemySpawner _enemySpawner;
     [Inject]
-    private void Construct(EnemySpawner enemySpawner)
+    private void Construct(EnemySpawner enemySpawner, Player player)
     {
+        _player = player;
         _enemySpawner = enemySpawner;
     }
 
     public override void Execute(GameObject user, params object[] parameters)
     {
         RaycastHit hit;
-        if (Physics.Raycast(user.transform.position, user.transform.forward, out hit, Range))
+        if (Physics.Raycast(new Ray(user.transform.position, _player.transform.position - user.transform.position), out hit, Range))
         {
+            Debug.LogError("Hit");
             var damageble = hit.transform.GetComponent<IDamageble>();
             if (damageble != null)
             {

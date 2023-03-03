@@ -11,6 +11,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a74ba2f6fe52fc444bb1fa26df4d3dc5, type: 3}
   m_Name: RedFlyAtSpawn
   m_EditorClassIdentifier: 
-  _flyUpDistance: 1
+  _flyUpDistance: 0.5
   _flyUpSpeed: 1
   _afterFlyUpBeforeMoveDelay: 1
