@@ -66,7 +66,7 @@ public class ReboundPlayerBulletsController : BulletsController
                 return;
             }
 
-            bullet.transform.LookAt(enemy.transform);
+            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - enemy.transform.position);
         }
     }
 }
