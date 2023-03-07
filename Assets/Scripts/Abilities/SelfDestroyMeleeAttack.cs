@@ -28,7 +28,6 @@ public class SelfDestroyMeleeAttack : Ability, IAttackAbillity {
         RaycastHit hit;
         if (Physics.Raycast(new Ray(user.transform.position, _player.transform.position - user.transform.position), out hit, Range))
         {
-            Debug.LogError("Hit");
             var damageble = hit.transform.GetComponent<IDamageble>();
             if (damageble != null)
             {
