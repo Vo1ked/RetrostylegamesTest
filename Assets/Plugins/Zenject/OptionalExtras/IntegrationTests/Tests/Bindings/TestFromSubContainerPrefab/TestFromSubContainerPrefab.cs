@@ -16,6 +16,11 @@ namespace Zenject.Tests.Bindings
             get { return FixtureUtil.GetPrefab("TestFromSubContainerPrefab/Foo"); }
         }
 
+        GameObject CircFooPrefab
+        {
+            get { return FixtureUtil.GetPrefab("TestFromSubContainerPrefab/CircFoo"); }
+        }
+
         GameObject FooPrefab2
         {
             get { return FixtureUtil.GetPrefab("TestFromSubContainerPrefab/Foo2"); }
@@ -250,6 +255,25 @@ namespace Zenject.Tests.Bindings
             PostInstall();
 
             FixtureUtil.AssertNumGameObjects(1);
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator TestCircularDependency()
+        {
+            PreInstall();
+            CommonInstall();
+
+            Container.Bind<CircBar>().FromNewComponentOnNewGameObject().AsSingle();
+
+            Container.Bind<CircFoo>().FromSubContainerResolve()
+                .ByNewContextPrefab(CircFooPrefab).AsSingle().NonLazy();
+
+            PostInstall();
+
+            FixtureUtil.AssertNumGameObjects(2);
+            FixtureUtil.AssertComponentCount<CircFoo>(1);
+            FixtureUtil.AssertComponentCount<CircBar>(1);
             yield break;
         }
     }

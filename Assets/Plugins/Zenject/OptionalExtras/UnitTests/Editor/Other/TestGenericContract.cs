@@ -47,5 +47,59 @@ namespace Zenject.Tests.Other
             Container.Resolve<Test1<List<int>>>();
             Container.Resolve<Test1<Test2>>();
         }
+
+        interface IFoo<T>
+        {
+        }
+
+        interface IBar<T>
+        {
+        }
+
+        class Test2<T> : IFoo<T>, IBar<T>
+        {
+        }
+
+        [Test]
+        public void TestToSingleMultipleContracts()
+        {
+            Container.Bind(typeof(IFoo<>), typeof(IBar<>)).To(typeof(Test2<>)).AsSingle();
+
+            var foo = Container.Resolve<IFoo<int>>();
+            Assert.That(foo is Test2<int>);
+
+            var bar = Container.Resolve<IBar<int>>();
+            Assert.That(bar is Test2<int>);
+
+            Assert.IsEqual(foo, bar);
+            Assert.IsEqual(foo, Container.Resolve<IFoo<int>>());
+            Assert.IsEqual(bar, Container.Resolve<IBar<int>>());
+        }
+
+        public interface IQux {
+        }
+
+        public class Qux : IQux {
+        }
+
+        [Test]
+        public void TestToSingleMultipleContractsMismatch()
+        {
+            Container.Bind(typeof(IQux), typeof(IFoo<>), typeof(IBar<>)).To(typeof(Test2<>), typeof(Qux)).AsSingle();
+
+            var foo = Container.Resolve<IFoo<int>>();
+            Assert.That(foo is Test2<int>);
+
+            var bar = Container.Resolve<IBar<int>>();
+            Assert.That(bar is Test2<int>);
+
+            Assert.IsEqual(foo, bar);
+            Assert.IsEqual(foo, Container.Resolve<IFoo<int>>());
+            Assert.IsEqual(bar, Container.Resolve<IBar<int>>());
+
+            var qux = Container.Resolve<IQux>();
+
+            Assert.IsEqual(qux, Container.Resolve<IQux>());
+        }
     }
 }

@@ -33,12 +33,40 @@ namespace Zenject.Tests.Bindings.FromPrefabInstaller
         }
 
         [UnityTest]
+        public IEnumerator TestInstallerGetter()
+        {
+            PreInstall();
+
+            Container.Bind<Qux>().FromSubContainerResolve()
+                .ByNewPrefabInstaller<FooInstaller>(_ => FooPrefab).AsCached();
+
+            PostInstall();
+
+            Assert.IsEqual(Container.Resolve<Qux>().Data, "asdf");
+            yield break;
+        }
+
+        [UnityTest]
         public IEnumerator TestMethod()
         {
             PreInstall();
 
             Container.Bind<Qux>().FromSubContainerResolve()
                 .ByNewPrefabMethod(FooPrefab, InstallFoo).AsCached();
+
+            PostInstall();
+
+            Assert.IsEqual(Container.Resolve<Qux>().Data, "asdf");
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator TestMethodGetter()
+        {
+            PreInstall();
+
+            Container.Bind<Qux>().FromSubContainerResolve()
+                .ByNewPrefabMethod((context) => FooPrefab, InstallFoo).AsCached();
 
             PostInstall();
 

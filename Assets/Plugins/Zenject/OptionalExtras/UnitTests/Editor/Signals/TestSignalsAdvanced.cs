@@ -182,6 +182,25 @@ namespace Zenject.Tests.Signals
         }
 
         [Test]
+        public void TestIsDeclared1()
+        {
+            Container.DeclareSignal<FooSignal>();
+            Container.ResolveRoots();
+
+            var signalBus = Container.Resolve<SignalBus>();
+            Assert.That(signalBus.IsSignalDeclared<FooSignal>());
+        }
+
+        [Test]
+        public void TestIsDeclared2()
+        {
+            Container.ResolveRoots();
+
+            var signalBus = Container.Resolve<SignalBus>();
+            Assert.That(!signalBus.IsSignalDeclared<FooSignal>());
+        }
+
+        [Test]
         public void TestSignalDeclarationSettingsRunAsync2()
         {
             Container.DeclareSignal<FooSignal>().RunAsync();
