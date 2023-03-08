@@ -12,7 +12,6 @@ public class FlyToPlayer : Ability, IPauseHandler
 
     [SerializeField] private float _flySpeed;
 
-    private CancellationTokenSource _flyCanceletionToken;
     private List<IMovable> _movables = new List<IMovable>();
 
     private Player _player;
@@ -22,7 +21,6 @@ public class FlyToPlayer : Ability, IPauseHandler
     {
         _pauseManager = pauseManager;
         _player = player;
-        _flyCanceletionToken = new CancellationTokenSource();
         _pauseManager.SubscribeHandler(this);
         _player.OnPlayerDestroy += OnPlayerDestroy;
     }
@@ -32,33 +30,35 @@ public class FlyToPlayer : Ability, IPauseHandler
         _player.OnPlayerDestroy -= OnPlayerDestroy;
         _movables.Clear();
         _pauseManager.UnsubscribeHandler(this);
-        _flyCanceletionToken.Cancel();
-        _flyCanceletionToken.Dispose();
     }
 
     public override void Execute(GameObject user, params object[] parameters)
     {
         var movable = user.GetComponent<IMovable>();
-        Fly(movable, _flyCanceletionToken.Token);
+        Fly(movable, _pauseManager.PauseCancellationToken.Token);
         _movables.Add(movable);
     }
 
     private async void Fly(IMovable movable, CancellationToken token)
     {
-        if (token.IsCancellationRequested)
+        try
         {
-            return;
-        }
-        var direction = (_player.transform.position - movable.Rigidbody.position).normalized;
-        movable.Rigidbody.MovePosition(movable.Rigidbody.position + direction * _flySpeed * Time.deltaTime);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+            var direction = (_player.transform.position - movable.Rigidbody.position).normalized;
+            movable.Rigidbody.MovePosition(movable.Rigidbody.position + direction * _flySpeed * Time.deltaTime);
 
-        await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token).ContinueWith(IgnoreCanceledTask);
+            await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 
-        if (token.IsCancellationRequested)
-        {
-            return;
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+            Fly(movable, token);
         }
-        Fly(movable, token);
+        catch (TaskCanceledException) { }
     }
 
     public void OnPause(bool IsPause)
@@ -66,30 +66,12 @@ public class FlyToPlayer : Ability, IPauseHandler
         if (_movables.Count < 1)
             return;
 
-        if (IsPause)
+        if (!IsPause)
         {
-            _flyCanceletionToken.Cancel(false);
-            _flyCanceletionToken.Dispose();
-        }
-        else
-        {
-            _flyCanceletionToken = new CancellationTokenSource();
             foreach (IMovable movable in _movables)
             {
-                Fly(movable, _flyCanceletionToken.Token);
+                Fly(movable, _pauseManager.PauseCancellationToken.Token);
             }
-        }
-    }
-    private static void IgnoreCanceledTask(Task task)
-    {
-        if (task.IsCanceled)
-        {
-            return;
-        }
-
-        if (task.Exception != null)
-        {
-            Debug.LogException(task.Exception);
         }
     }
 }

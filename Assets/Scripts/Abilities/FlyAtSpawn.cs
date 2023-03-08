@@ -1,6 +1,7 @@
-﻿using System;
+﻿using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -16,12 +17,10 @@ public class FlyAtSpawn : Ability, IPauseHandler
 
     private Player _player;
 	private List<IMovable> _movables = new List<IMovable>();
-	private CoroutineRunner _coroutineRunner;
 	private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(CoroutineRunner coroutineRunner, PauseManager pauseManager, Player player)
+	private void Construct(PauseManager pauseManager, Player player)
 	{
-		_coroutineRunner = coroutineRunner;
 		_pauseManager = pauseManager;
         _player = player;
 		_pauseManager.SubscribeHandler(this);
@@ -34,6 +33,7 @@ public class FlyAtSpawn : Ability, IPauseHandler
 		_player.OnPlayerDestroy -= OnPlayerDestroy;
 		_movables.Clear();
 		_pauseManager.UnsubscribeHandler(this);
+
 	}
 
 	public override void Execute(GameObject user, params object[] parameters)
@@ -41,31 +41,36 @@ public class FlyAtSpawn : Ability, IPauseHandler
 		var movable = user.GetComponent<IMovable>();
 		movable.TargetPosition = user.transform.position + Vector3.up * _flyUpDistance;
 
-		movable.Coroutine = _coroutineRunner.RunCoroutine(FlyUp(movable));
+		FlyUp(movable, _pauseManager.PauseCancellationToken.Token);
 		_movables.Add(movable);
 	}
 
-    private IEnumerator FlyUp(IMovable movable)
-    {
-        while (Vector3.Distance (movable.Rigidbody.transform.position, movable.TargetPosition) > 0.1f)
-        {
-			if (_pauseManager.IsPaused)
+	private async void FlyUp(IMovable movable, CancellationToken token)
+	{
+		try
+		{
+			while (movable.Rigidbody != null && Vector3.Distance(movable.Rigidbody.transform.position, movable.TargetPosition) > 0.1f)
 			{
-				yield break;
-			}
-			var direction = (movable.TargetPosition - movable.Rigidbody.transform.position).normalized;
-			movable.Rigidbody.MovePosition(movable.Rigidbody.transform.position + direction * _flyUpSpeed * Time.deltaTime);
-			yield return null;
-		}
+				if (token.IsCancellationRequested)
+				{
+					return;
+				}
+				var direction = (movable.TargetPosition - movable.Rigidbody.transform.position).normalized;
+				movable.Rigidbody.MovePosition(movable.Rigidbody.transform.position + direction * _flyUpSpeed * Time.deltaTime);
+				await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 
-		var wait = new WaitForSeconds(_afterFlyUpBeforeMoveDelay);
-		yield return wait;
-        if (movable != null && !_pauseManager.IsPaused)
-        {
+			}
+			await Task.Delay(Mathf.RoundToInt(_afterFlyUpBeforeMoveDelay * 1000f), token);
+			if (token.IsCancellationRequested)
+			{
+				return;
+			}
 			_movables.Remove(movable);
 			movable.CompletedMove?.Invoke();
 			movable.Coroutine = null;
+
 		}
+		catch (TaskCanceledException) { }
 	}
 
     public void OnPause(bool IsPause)
@@ -73,25 +78,11 @@ public class FlyAtSpawn : Ability, IPauseHandler
 		if (_movables.Count < 1)
 			return;
 
-		if (IsPause)
+		if (!IsPause)
 		{
 			foreach (IMovable movable in _movables)
 			{
-				if (movable.Coroutine != null)
-				{
-					_coroutineRunner.StopRunningCoroutine(movable.Coroutine);
-					movable.Coroutine = null;
-				}
-			}
-		}
-		else
-		{
-			foreach (IMovable movable in _movables)
-			{
-				if (movable.Coroutine == null)
-				{
-					movable.Coroutine = _coroutineRunner.RunCoroutine(FlyUp(movable));
-				}
+				FlyUp(movable, _pauseManager.PauseCancellationToken.Token);
 			}
 		}
 	}

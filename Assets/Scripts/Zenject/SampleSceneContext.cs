@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using Zenject;
 
 public class SampleSceneContext : MonoInstaller{
+
+    private List<System.IDisposable> _disposables = new List<System.IDisposable>();
 
     public override void InstallBindings()
     {
@@ -17,8 +19,16 @@ public class SampleSceneContext : MonoInstaller{
         Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
         Container.Bind<UiManager>().FromComponentInHierarchy().AsSingle();
-        Container.Bind<PauseManager>().AsSingle();
+
+        var pauseManager = new PauseManager();
+        _disposables.Add(pauseManager);
+        Container.Bind<PauseManager>().FromInstance(pauseManager).AsSingle();
         Container.Bind<Score>().AsSingle();
 
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.ForEach(x => x.Dispose());
     }
 }

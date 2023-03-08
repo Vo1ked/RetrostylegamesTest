@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -12,9 +13,9 @@ MonoBehaviour:
   m_Name: PlayerBulletStats
   m_EditorClassIdentifier: 
   name: PlayerBullet
-  Bullet: {fileID: 114932698647415610, guid: 89dc911d0dd3de542a80e9bd85c2dfea, type: 2}
+  Bullet: {fileID: 114932698647415610, guid: 89dc911d0dd3de542a80e9bd85c2dfea, type: 3}
   Shooter: {fileID: 0}
-  Speed: 30
+  Speed: 50
   HitInfo:
     _healsDamage: 25
     _manaDamage: 0
