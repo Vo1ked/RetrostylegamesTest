@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using System;
+using System.Threading.Tasks;
+using System.Threading;
 
 [Serializable]
 [CreateAssetMenu(fileName = "BulletsController", menuName = "My Game/Shooter/BulletsController")]
@@ -16,14 +17,12 @@ public class BulletsController : ScriptableObject, IPauseHandler
     [NonSerialized] protected int _bulletIndex;
 
     protected BulletContainer _bulletContainer;
-    protected CoroutineRunner _coroutineRunner;
     protected PauseManager _pauseManager;
 
     [Inject]
-    private void Construct(BulletContainer bulletContainer, CoroutineRunner coroutineRunner, PauseManager pauseManager, Dispose dispose)
+    private void Construct(BulletContainer bulletContainer, PauseManager pauseManager, Dispose dispose)
     {
         _bulletContainer = bulletContainer;
-        _coroutineRunner = coroutineRunner;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
 
@@ -66,7 +65,7 @@ public class BulletsController : ScriptableObject, IPauseHandler
     public virtual void Move(Bullet bullet)
     {
         bullet.transform.LookAt(bullet.Shooter.transform);
-        bullet.MoveCoroutine = _coroutineRunner.RunCoroutine(MoveForward(bullet));
+        MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
     }
 
 
@@ -79,62 +78,46 @@ public class BulletsController : ScriptableObject, IPauseHandler
     protected virtual void Destroy(Bullet bullet)
     {
         bullet.Hited -= OnCollision;
-        if (bullet.MoveCoroutine != null)
-        {
-            _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
-            bullet.MoveCoroutine = null;
-        }
-
         _spawnedBullets.Remove(bullet);
         GameObject.Destroy(bullet.gameObject);
     }
 
-    protected IEnumerator MoveForward(Bullet bullet)
+    protected async void MoveForward(Bullet bullet, CancellationToken token)
     {
         if (bullet == null)
         {
-            yield break;
+            return;
         }
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
         {
-            if (_pauseManager.IsPaused)
+            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
             {
-                yield break;
+                return;
             }
             rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward * _bulletsStats.Speed * Time.deltaTime);
-            yield return null;
+            try
+            {
+                await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
             bullet.TimeToDeleteLeft -= Time.deltaTime;
-
+            }
+            catch (TaskCanceledException) { }
         }
 
         bullet.MoveCoroutine = null;
     }
 
-    public void OnPause(bool IsPause)
+    public virtual void OnPause(bool IsPause)
     {
         if (_spawnedBullets.Count < 1)
             return;
 
-        if (IsPause)
+        if (!IsPause)
         {
+
             foreach (Bullet bullet in _spawnedBullets)
             {
-                if (bullet.MoveCoroutine != null)
-                {
-                    _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
-                    bullet.MoveCoroutine = null;
-                }
-            }
-        }
-        else
-        {
-            foreach (Bullet bullet in _spawnedBullets)
-            {
-                if (bullet.MoveCoroutine == null)
-                {
-                    bullet.MoveCoroutine = _coroutineRunner.RunCoroutine(MoveForward(bullet));
-                }
+                MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
             }
         }
     }

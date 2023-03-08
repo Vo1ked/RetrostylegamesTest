@@ -4,14 +4,14 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
+using System.Threading;
+using System.Threading.Tasks;
 
 public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, IMovable
 {
     public event System.Action<Enemy, HitInfo> Damaged = (Enemy, HitInfo) => { };
     public int CurrentHeals;
     public EnemyStats EnemyStats { get; private set; }
-
-    public Coroutine Coroutine { get; set; }
     public Rigidbody Rigidbody { get; private set; }
     public Vector3 TargetPosition { get; set; }
     public System.Action CompletedMove { get; set; }
@@ -20,7 +20,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     [SerializeField] private Transform _bulletSpawnPoint;
 
     private float _attackReloadTimeLeft;
-    private Coroutine _reloadCoroutine;
     private IAttackAbillity _attackAbillity;
 
     private PauseManager _pauseManager;
@@ -82,35 +81,33 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     public void StartMove()
     {
-        Coroutine = StartCoroutine(Move());
+        Move(_pauseManager.PauseCancellationToken.Token);
     }
 
-    private IEnumerator Move()
+    private async void Move(CancellationToken token)
     {
         List<Ability> abilities = new List<Ability>();
         if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Move, ref abilities))
         {
-            var pathUpdateDelay = 0.5f;
-            var wait = new WaitForSeconds(pathUpdateDelay);
+            var pathUpdateDelay = 500;
             _agent.SetDestination(_player.transform.position);
-            yield return wait;
-            if (_pauseManager.IsPaused)
+            try
             {
-                yield break;
+                await Task.Delay(pathUpdateDelay,token);
             }
-            if (Coroutine != null)
+            catch (TaskCanceledException) { }
+            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
             {
-                StopCoroutine(Coroutine);
-                Coroutine = null;
+                return;
             }
-            Coroutine = StartCoroutine(Move());
-            yield break;
+            Move(token);
+            return;
         }
         var overrideAbility = abilities.First(abbility => abbility.WorkType == WorkType.@override);
 
         if (overrideAbility != null)
         {
-            overrideAbility.Execute(gameObject, this, Coroutine);
+            overrideAbility.Execute(gameObject);
         }
     }
     public void OnPause(bool isPause)
@@ -120,29 +117,14 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             _agent.isStopped = isPause;
         }
 
-        if (isPause)
+        if (!isPause)
         {
-            if (Coroutine != null)
-            {
-                StopCoroutine(Coroutine);
-                Coroutine = null;
-            }
 
-            if (_reloadCoroutine != null)
+            Move(_pauseManager.PauseCancellationToken.Token);
+
+            if (_attackReloadTimeLeft > 0)
             {
-                StopCoroutine(_reloadCoroutine);
-                _reloadCoroutine = null;
-            }
-        }
-        else
-        {
-            if (Coroutine == null)
-            {
-                Coroutine = StartCoroutine(Move());
-            }
-            if (_attackReloadTimeLeft > 0 && _reloadCoroutine == null)
-            {
-                _reloadCoroutine = StartCoroutine(WaitAttackRange(_attackReloadTimeLeft));
+                WaitAttackRange(_attackReloadTimeLeft, _pauseManager.PauseCancellationToken.Token);
             }
         }
     }
@@ -163,13 +145,13 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
                 return;
             var distance = Vector3.Distance(_player.transform.position, transform.position);
 
-            if (distance > attackAbillity.AttackRange && _reloadCoroutine == null)
+            if (distance > attackAbillity.AttackRange)
             {
-                _reloadCoroutine = StartCoroutine(WaitAttackRange(attackAbillity.ReloadTime));
+                WaitAttackRange(attackAbillity.ReloadTime, _pauseManager.PauseCancellationToken.Token);
                 return;
             }
             overrideAbility.Execute(gameObject, this);
-            _reloadCoroutine = StartCoroutine(WaitAttackRange(attackAbillity.ReloadTime));
+            WaitAttackRange(attackAbillity.ReloadTime, _pauseManager.PauseCancellationToken.Token);
         }
     }
 
@@ -182,48 +164,38 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         return _attackAbillity = ability as IAttackAbillity;
     }
 
-    private IEnumerator WaitAttackRange(float timer)
+    private async void WaitAttackRange(float timer, CancellationToken token)
     {
         _attackReloadTimeLeft = timer;
 
-        while (_attackReloadTimeLeft > 0)
+        try
         {
-            yield return null;
-            if (_pauseManager.IsPaused)
+            while (_attackReloadTimeLeft > 0)
             {
-                yield break;
-            }
-            _attackReloadTimeLeft -= Time.deltaTime;
-        }
+                await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 
-        var wait = new WaitForSeconds(0.5f);
-        while (Vector3.Distance(_player.transform.position, transform.position) > _attackAbillity.AttackRange)
-        {
-            yield return wait;
-            if (_pauseManager.IsPaused)
-            {
-                yield break;
+                if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                _attackReloadTimeLeft -= Time.fixedDeltaTime;
             }
+
+            while (Vector3.Distance(_player.transform.position, transform.position) > _attackAbillity.AttackRange)
+            {
+                await Task.Delay(250, token);
+                if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+            }
+            Attack();
         }
-        _reloadCoroutine = null;
-        Attack();
+        catch (TaskCanceledException) { }
     }
 
     private void OnDestroy()
     {
         _pauseManager.UnsubscribeHandler(this);
-        if (Coroutine != null)
-        {
-            StopCoroutine(Coroutine);
-            Coroutine = null;
-        }
-
-        if (_reloadCoroutine != null)
-        {
-            StopCoroutine(_reloadCoroutine);
-            _reloadCoroutine = null;
-
-        }
-
     }
 }

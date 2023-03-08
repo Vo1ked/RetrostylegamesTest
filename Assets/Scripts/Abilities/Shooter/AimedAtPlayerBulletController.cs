@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using System.Threading.Tasks;
+using System.Threading;
 
 [CreateAssetMenu(fileName = "AimedToPlayerBulletController", menuName = "My Game/Shooter/AimBulletController")]
 public class AimedAtPlayerBulletController : BulletsController
@@ -36,14 +36,9 @@ public class AimedAtPlayerBulletController : BulletsController
 
         foreach (Bullet bullet in bulletsToRemove)
         {
-            if (bullet.MoveCoroutine != null)
-            {
-                _coroutineRunner.StopRunningCoroutine(bullet.MoveCoroutine);
-                bullet.MoveCoroutine = null;
-            }
             _loseTargetBullets.Add(bullet);
             bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - _player.transform.position);
-            bullet.MoveCoroutine = _coroutineRunner.StartCoroutine(MoveForward(bullet));
+            MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
         }
     }
 
@@ -56,24 +51,26 @@ public class AimedAtPlayerBulletController : BulletsController
     public override void Move(Bullet bullet)
     {
         bullet.transform.LookAt(_player.transform);
-        bullet.MoveCoroutine = _coroutineRunner.RunCoroutine(MoveToPlayer(bullet));
+        MoveToPlayer(bullet,_pauseManager.PauseCancellationToken.Token);
     }
 
-    private IEnumerator MoveToPlayer(Bullet bullet)
+    private async void MoveToPlayer(Bullet bullet,CancellationToken token)
     {
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
         {
-            if (_pauseManager.IsPaused)
+            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
             {
-                yield break;
+                return;
             }
             var direction = (_player.transform.position - bullet.transform.position).normalized;
             rigidBody.MovePosition(bullet.transform.position + direction * _bulletsStats.Speed * Time.deltaTime);
-            yield return null;
             bullet.TimeToDeleteLeft -= Time.deltaTime;
+            try
+            {
+                await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
+            }
+            catch (TaskCanceledException) { }
         }
-
-        bullet.MoveCoroutine = null;
     }
 }

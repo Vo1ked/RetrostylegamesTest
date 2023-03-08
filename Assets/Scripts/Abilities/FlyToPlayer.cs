@@ -43,7 +43,7 @@ public class FlyToPlayer : Ability, IPauseHandler
     {
         try
         {
-            if (token.IsCancellationRequested)
+            if (token.IsCancellationRequested || movable.Rigidbody == null)
             {
                 return;
             }

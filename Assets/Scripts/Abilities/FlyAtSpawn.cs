@@ -67,7 +67,6 @@ public class FlyAtSpawn : Ability, IPauseHandler
 			}
 			_movables.Remove(movable);
 			movable.CompletedMove?.Invoke();
-			movable.Coroutine = null;
 
 		}
 		catch (TaskCanceledException) { }
