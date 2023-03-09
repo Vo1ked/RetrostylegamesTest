@@ -38,7 +38,10 @@ public class AimedAtPlayerBulletController : BulletsController
         {
             _loseTargetBullets.Add(bullet);
             bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - _player.transform.position);
-            MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
+            bullet.DestroyCancellationToken.Cancel();
+            bullet.DestroyCancellationToken.Dispose();
+            bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+            MoveForward(bullet, bullet.DestroyCancellationToken.Token);
         }
     }
 
@@ -51,7 +54,8 @@ public class AimedAtPlayerBulletController : BulletsController
     public override void Move(Bullet bullet)
     {
         bullet.transform.LookAt(_player.transform);
-        MoveToPlayer(bullet,_pauseManager.PauseCancellationToken.Token);
+        bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+        MoveToPlayer(bullet, bullet.DestroyCancellationToken.Token);
     }
 
     private async void MoveToPlayer(Bullet bullet,CancellationToken token)
@@ -59,7 +63,7 @@ public class AimedAtPlayerBulletController : BulletsController
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
         {
-            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+            if (token.IsCancellationRequested)
             {
                 return;
             }

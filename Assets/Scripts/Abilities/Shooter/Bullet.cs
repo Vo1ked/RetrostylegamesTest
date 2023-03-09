@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using System.Threading;
 
 public class Bullet : MonoBehaviour {
 
 	public event System.Action<Bullet, Collider> Hited;
-	public Coroutine MoveCoroutine;
+    public CancellationTokenSource DestroyCancellationToken;
 	public float TimeToDeleteLeft;
 	[HideInInspector] public GameObject Shooter;
 	[SerializeField] private CollisionEventRepeater _collisionEventRepeater;

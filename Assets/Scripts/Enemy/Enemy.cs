@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -21,6 +20,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     private float _attackReloadTimeLeft;
     private IAttackAbillity _attackAbillity;
+    private CancellationTokenSource _destroyCancellationToken;
 
     private PauseManager _pauseManager;
     private Player _player;
@@ -52,6 +52,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     {
         EnemyStats = stats;
         CurrentHeals = EnemyStats.StartHeals;
+        _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
 
         List<Ability> abilities = new List<Ability>();
         if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Spawn, ref abilities))
@@ -81,7 +82,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     public void StartMove()
     {
-        Move(_pauseManager.PauseCancellationToken.Token);
+        Move(_destroyCancellationToken.Token);
     }
 
     private async void Move(CancellationToken token)
@@ -96,7 +97,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
                 await Task.Delay(pathUpdateDelay,token);
             }
             catch (TaskCanceledException) { }
-            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+            if (token.IsCancellationRequested)
             {
                 return;
             }
@@ -119,12 +120,12 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
         if (!isPause)
         {
-
-            Move(_pauseManager.PauseCancellationToken.Token);
+            _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+            Move(_destroyCancellationToken.Token);
 
             if (_attackReloadTimeLeft > 0)
             {
-                WaitAttackRange(_attackReloadTimeLeft, _pauseManager.PauseCancellationToken.Token);
+                WaitAttackRange(_attackReloadTimeLeft, _destroyCancellationToken.Token);
             }
         }
     }
@@ -144,14 +145,13 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             if (_attackReloadTimeLeft > 0)
                 return;
             var distance = Vector3.Distance(_player.transform.position, transform.position);
-
             if (distance > attackAbillity.AttackRange)
             {
-                WaitAttackRange(attackAbillity.ReloadTime, _pauseManager.PauseCancellationToken.Token);
+                WaitAttackRange(attackAbillity.ReloadTime, _destroyCancellationToken.Token);
                 return;
             }
             overrideAbility.Execute(gameObject, this);
-            WaitAttackRange(attackAbillity.ReloadTime, _pauseManager.PauseCancellationToken.Token);
+            WaitAttackRange(attackAbillity.ReloadTime, _destroyCancellationToken.Token);
         }
     }
 
@@ -174,7 +174,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             {
                 await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 
-                if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                 {
                     return;
                 }
@@ -184,7 +184,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             while (Vector3.Distance(_player.transform.position, transform.position) > _attackAbillity.AttackRange)
             {
                 await Task.Delay(250, token);
-                if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                 {
                     return;
                 }
@@ -197,5 +197,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     private void OnDestroy()
     {
         _pauseManager.UnsubscribeHandler(this);
+        _destroyCancellationToken.Cancel();
+        _destroyCancellationToken.Dispose();
     }
 }

@@ -65,7 +65,8 @@ public class BulletsController : ScriptableObject, IPauseHandler
     public virtual void Move(Bullet bullet)
     {
         bullet.transform.LookAt(bullet.Shooter.transform);
-        MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
+        bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+        MoveForward(bullet, bullet.DestroyCancellationToken.Token);
     }
 
 
@@ -79,6 +80,8 @@ public class BulletsController : ScriptableObject, IPauseHandler
     {
         bullet.Hited -= OnCollision;
         _spawnedBullets.Remove(bullet);
+        bullet.DestroyCancellationToken.Cancel();
+        bullet.DestroyCancellationToken.Dispose();
         GameObject.Destroy(bullet.gameObject);
     }
 
@@ -91,7 +94,7 @@ public class BulletsController : ScriptableObject, IPauseHandler
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
         {
-            if (_pauseManager.PauseCancellationToken.IsCancellationRequested)
+            if (token.IsCancellationRequested)
             {
                 return;
             }
@@ -103,8 +106,6 @@ public class BulletsController : ScriptableObject, IPauseHandler
             }
             catch (TaskCanceledException) { }
         }
-
-        bullet.MoveCoroutine = null;
     }
 
     public virtual void OnPause(bool IsPause)
@@ -114,10 +115,10 @@ public class BulletsController : ScriptableObject, IPauseHandler
 
         if (!IsPause)
         {
-
             foreach (Bullet bullet in _spawnedBullets)
             {
-                MoveForward(bullet,_pauseManager.PauseCancellationToken.Token);
+                bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+                MoveForward(bullet, bullet.DestroyCancellationToken.Token);
             }
         }
     }
