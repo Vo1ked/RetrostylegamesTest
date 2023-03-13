@@ -18,7 +18,7 @@ MonoBehaviour:
   Mana:
     MaxMana: 100
     StartMana: 50
-  MoveSpeed: 3
+  MoveSpeed: 4
   RotationSpeed: 0.5
   MaxUpRotation: -75
   MaxDownRotation: 35

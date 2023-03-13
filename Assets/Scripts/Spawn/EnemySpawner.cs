@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using System.Threading;
+using System.Threading.Tasks;
 
 public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
@@ -12,7 +12,6 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
 	private float _currentDelay;
 	private float _currentMultiplier;
-	private Coroutine _spawnWait;
 	private float _toNextSpawn;
 
     private SpawnFactory _spawnPoisition;
@@ -71,20 +70,9 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
     public void OnPause(bool IsPause)
     {
-        if (IsPause)
+        if (!IsPause)
         {
-            if (_spawnWait != null)
-            {
-                StopCoroutine(_spawnWait);
-                _spawnWait = null;
-            }
-        }
-        else
-        {
-            if (_spawnWait == null)
-            {
-                _spawnWait = StartCoroutine(SpawnWait(_toNextSpawn));
-            }
+            SpawnWait(_toNextSpawn, _pauseManager.PauseCancellationToken.Token);
         }
     }
 
@@ -114,7 +102,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         }
 
         _currentDelay = _spawnPatern.StartSpawnDelay;
-        _spawnWait = StartCoroutine(SpawnWait(_spawnPatern.DelayBeforeFirstSpawn));
+        SpawnWait(_spawnPatern.DelayBeforeFirstSpawn, _pauseManager.PauseCancellationToken.Token);
     }
 
     private void Spawn()
@@ -138,7 +126,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
             }
         }
         ChangeSpawnDelay();
-        _spawnWait = StartCoroutine(SpawnWait(_currentDelay));
+        SpawnWait(_currentDelay,_pauseManager.PauseCancellationToken.Token);
     }
 
     private int GetEnemySpawnCount(EnemyToSpawn enemyToSpawn)
@@ -176,21 +164,24 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         Destroy(enemy);
     }
 
-	private IEnumerator SpawnWait(float waitTime)
+	private async void SpawnWait(float waitTime, CancellationToken token)
     {
 		_toNextSpawn = waitTime;
-        while (_toNextSpawn > 0)
+		var stopwatch = new  System.Diagnostics.Stopwatch();
+        try
         {
-			yield return null;
-			_toNextSpawn -= Time.deltaTime;
-            if (_pauseManager.IsPaused)
-            {
-                yield break;
-            }
+            await Task.Delay(Mathf.RoundToInt(waitTime * 1000f), token);
+            if (token.IsCancellationRequested)
+                return;
+            Spawn();
         }
-        _spawnWait = null;
+        catch (TaskCanceledException)
+        {
+            _toNextSpawn = waitTime - (float)stopwatch.Elapsed.TotalSeconds;
+        }
 
-        Spawn();
+        stopwatch.Stop();
+
     }
 
     private void OnDestroy()

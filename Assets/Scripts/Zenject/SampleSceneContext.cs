@@ -16,7 +16,6 @@ public class SampleSceneContext : MonoInstaller{
         Container.Bind<SpawnFactory>().AsSingle();
         Container.Bind<EnemySpawner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
-        Container.Bind<CoroutineRunner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
         Container.Bind<UiManager>().FromComponentInHierarchy().AsSingle();
         var pauseManager = new PauseManager();

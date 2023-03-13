@@ -723,7 +723,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 735044534}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &154650309
 GameObject:
@@ -2684,50 +2684,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbed837586d02bf40b1431418d05919a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &683079653
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 683079654}
-  - component: {fileID: 683079655}
-  m_Layer: 0
-  m_Name: CoroutineRunner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &683079654
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 683079653}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 735044534}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &683079655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 683079653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c3c77c24bb4e524789641a15cb870ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &731451355
 GameObject:
   m_ObjectHideFlags: 0
@@ -2909,7 +2865,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 683079654}
   - {fileID: 1459083192}
   - {fileID: 143433974}
   m_Father: {fileID: 0}
@@ -5337,7 +5292,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _camera: {fileID: 534669905}
   _bulletSpawnPoint: {fileID: 1438018113}
-  _playerStats: {fileID: 11400000, guid: fa837d0a7af326d47aa94ff5f4b54c18, type: 2}
+  _moveThreshold: 0.01
+  _rotateThreshold: 0.01
 --- !u!54 &1375209284
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5493,7 +5449,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 735044534}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1459083193
 MonoBehaviour:
