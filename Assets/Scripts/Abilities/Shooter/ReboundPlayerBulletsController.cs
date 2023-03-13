@@ -4,7 +4,7 @@ using UnityEngine;
 using Zenject; 
 
 [CreateAssetMenu(fileName = "ReboundPlayerBulletsController", menuName = "My Game/Shooter/ReboundPlayerBulletsController")]
-public class ReboundPlayerBulletsController : BulletsController, System.IDisposable
+public class ReboundPlayerBulletsController : BulletsController
 {
 
     [SerializeField] private float _baseReboundChance;
@@ -26,8 +26,9 @@ public class ReboundPlayerBulletsController : BulletsController, System.IDisposa
         _playerStats = playerStats;
         _onSceneExit.Add(this);
     }
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
         _reboundedBullets.Clear();
         _spawnedBullets.Clear();
     }

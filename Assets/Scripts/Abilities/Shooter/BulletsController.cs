@@ -7,17 +7,17 @@ using System.Threading;
 
 [Serializable]
 [CreateAssetMenu(fileName = "BulletsController", menuName = "My Game/Shooter/BulletsController")]
-public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
+public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
 {
+    [SerializeField] protected BulletsStats _bulletsStats;
     [SerializeField] private Vector3 _spawnOffset;
 
-    [SerializeField] protected BulletsStats _bulletsStats;
     [NonSerialized] protected List<Bullet> _spawnedBullets = new List<Bullet>();
     protected static float _autoDeleteTimer = 60;
     [NonSerialized] protected int _bulletIndex;
 
-    protected BulletContainer _bulletContainer;
-    protected PauseManager _pauseManager;
+    [NonSerialized] protected BulletContainer _bulletContainer;
+    [NonSerialized] protected PauseManager _pauseManager;
 
     [Inject]
     private void Construct(BulletContainer bulletContainer, PauseManager pauseManager, DisposeOnSceneExit dispose)
@@ -25,13 +25,6 @@ public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
         _bulletContainer = bulletContainer;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
-
-
-    }
-
-    public void Dispose()
-    {
-         _pauseManager.UnsubscribeHandler(this);
     }
 
     public virtual void Spawn(GameObject shooter)
@@ -48,22 +41,9 @@ public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
         _spawnedBullet.Shooter = shooter;
         _spawnedBullets.Add(_spawnedBullet);
-       //Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
+        //Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
 
         Move(_spawnedBullet);
-    }
-
-    protected virtual void OnCollision(Bullet bullet,Collider other)
-    {
-        var hit = other.GetComponent<IDamageble>();
-        if (hit == null)
-        {
-            Destroy(bullet);
-        }
-        else
-        {
-            Hit(bullet,hit);
-        }
     }
 
     public virtual void Move(Bullet bullet)
@@ -72,9 +52,40 @@ public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
         bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
         MoveForward(bullet, bullet.DestroyCancellationToken.Token);
     }
+    public virtual void Dispose()
+    {
+        _pauseManager.UnsubscribeHandler(this);
+    }
 
+    public virtual void OnPause(bool IsPause)
+    {
+        if (_spawnedBullets.Count < 1)
+            return;
 
-    protected virtual void Hit(Bullet bullet,IDamageble damageble)
+        if (!IsPause)
+        {
+            foreach (Bullet bullet in _spawnedBullets)
+            {
+                bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+                MoveForward(bullet, bullet.DestroyCancellationToken.Token);
+            }
+        }
+    }
+
+    protected virtual void OnCollision(Bullet bullet, Collider other)
+    {
+        var hit = other.GetComponent<IDamageble>();
+        if (hit == null)
+        {
+            Destroy(bullet);
+        }
+        else
+        {
+            Hit(bullet, hit);
+        }
+    }
+
+    protected virtual void Hit(Bullet bullet, IDamageble damageble)
     {
         damageble.Damage(_bulletsStats.HitInfo);
         Destroy(bullet);
@@ -106,26 +117,9 @@ public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
             try
             {
                 await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
-            bullet.TimeToDeleteLeft -= Time.deltaTime;
+                bullet.TimeToDeleteLeft -= Time.deltaTime;
             }
             catch (TaskCanceledException) { }
         }
     }
-
-    public virtual void OnPause(bool IsPause)
-    {
-        if (_spawnedBullets.Count < 1)
-            return;
-
-        if (!IsPause)
-        {
-            foreach (Bullet bullet in _spawnedBullets)
-            {
-                bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
-                MoveForward(bullet, bullet.DestroyCancellationToken.Token);
-            }
-        }
-    }
-
-
 }

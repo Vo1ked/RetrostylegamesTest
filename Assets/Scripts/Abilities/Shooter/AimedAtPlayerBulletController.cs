@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 
 [CreateAssetMenu(fileName = "AimedToPlayerBulletController", menuName = "My Game/Shooter/AimBulletController")]
-public class AimedAtPlayerBulletController : BulletsController,System.IDisposable
+public class AimedAtPlayerBulletController : BulletsController
 {
     [System.NonSerialized] private List<Bullet> _loseTargetBullets = new List<Bullet>();
 
@@ -13,7 +13,7 @@ public class AimedAtPlayerBulletController : BulletsController,System.IDisposabl
     [System.NonSerialized] private DisposeOnSceneExit _onSceneExit;
 
     [Inject]
-    private void Construct(Player player,DisposeOnSceneExit onSceneExit)
+    private void Construct(Player player, DisposeOnSceneExit onSceneExit)
     {
         _player = player;
         _player.PlayerStartTeleport += OnPlayerTeleported;
@@ -21,8 +21,9 @@ public class AimedAtPlayerBulletController : BulletsController,System.IDisposabl
         _onSceneExit.Add(this);
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
         _player.PlayerStartTeleport -= OnPlayerTeleported;
         _loseTargetBullets.Clear();
         _spawnedBullets.Clear();
@@ -60,7 +61,7 @@ public class AimedAtPlayerBulletController : BulletsController,System.IDisposabl
         MoveToPlayer(bullet, bullet.DestroyCancellationToken.Token);
     }
 
-    private async void MoveToPlayer(Bullet bullet,CancellationToken token)
+    private async void MoveToPlayer(Bullet bullet, CancellationToken token)
     {
         var rigidBody = bullet.GetComponent<Rigidbody>();
         while (bullet.TimeToDeleteLeft > 0)
@@ -79,6 +80,4 @@ public class AimedAtPlayerBulletController : BulletsController,System.IDisposabl
             catch (TaskCanceledException) { }
         }
     }
-
-
 }
