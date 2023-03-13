@@ -10,7 +10,6 @@ public class PlayerStats : ScriptableObject {
     public Mana Mana;
     [Space]
     public float MoveSpeed;
-    public float MaxMoveSpped;
     public float RotationSpeed;
     public float MaxUpRotation = -90;
     public float MaxDownRotation = 40;

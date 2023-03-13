@@ -40,10 +40,13 @@ public class UiManager : MonoBehaviour {
 	private void OnDestroy()
     {
 		_playerStats.Heals.HealsChanged -= OnDie;
+		OnOptionsClose();
 	}
 
 	public void OnOptionsClick()
     {
+		if (_pauseManager.IsPaused)
+			return;
 		_pauseManager.SetPause(true);
 		_optionsPopup.gameObject.SetActive(true);
 		_optionsPopup.Closed += OnOptionsClose;
@@ -54,5 +57,4 @@ public class UiManager : MonoBehaviour {
 		_optionsPopup.Closed -= OnOptionsClose;
 		_pauseManager.SetPause(false);
 	}
-
 }

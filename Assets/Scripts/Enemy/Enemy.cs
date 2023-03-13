@@ -73,6 +73,30 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         }
     }
 
+    public void OnPause(bool isPause)
+    {
+        if (_agent.enabled)
+        {
+            _agent.isStopped = isPause;
+        }
+
+        if (isPause && Rigidbody != null)
+        {
+            Rigidbody.Sleep();
+        }
+
+        if (!isPause)
+        {
+            _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+            Move(_destroyCancellationToken.Token);
+
+            if (_attackReloadTimeLeft > 0)
+            {
+                WaitAttackRange(_attackReloadTimeLeft, _destroyCancellationToken.Token);
+            }
+        }
+    }
+
     private void AfterCustomSpawnMove()
     {
         StartMove();
@@ -82,6 +106,8 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     public void StartMove()
     {
+        if (_destroyCancellationToken.Token.IsCancellationRequested)
+            return;
         Move(_destroyCancellationToken.Token);
     }
 
@@ -111,24 +137,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             overrideAbility.Execute(gameObject);
         }
     }
-    public void OnPause(bool isPause)
-    {
-        if (_agent.enabled)
-        {
-            _agent.isStopped = isPause;
-        }
 
-        if (!isPause)
-        {
-            _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
-            Move(_destroyCancellationToken.Token);
-
-            if (_attackReloadTimeLeft > 0)
-            {
-                WaitAttackRange(_attackReloadTimeLeft, _destroyCancellationToken.Token);
-            }
-        }
-    }
 
     private void Attack()
     {
@@ -199,5 +208,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         _pauseManager.UnsubscribeHandler(this);
         _destroyCancellationToken.Cancel();
         _destroyCancellationToken.Dispose();
+        CompletedMove -= AfterCustomSpawnMove;
     }
 }

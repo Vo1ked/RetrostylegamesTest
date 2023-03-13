@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -12,7 +14,8 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 
 	[SerializeField] private Transform _camera;
 	[SerializeField] private Transform _bulletSpawnPoint;
-	[SerializeField] private PlayerStats _playerStats;
+	[SerializeField] private float _moveThreshold = 0.01f;
+	[SerializeField] private float _rotateThreshold = 0.01f;
 
 	private Rigidbody _rigidbody;
 
@@ -24,26 +27,46 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 	private Quaternion _originCameraRotation;
 
 	private float _attackReloadTimeLeft;
+	private bool _moving;
+	private bool _rotating;
 
-	private Coroutine _moveCoroutine;
-	private Coroutine _rotateCoroutine;
-	private Coroutine _reloadCoroutine;
-
+	private PlayerStats _playerStats;
 	private IPlayerInput _input;
 	private SpawnFactory _spawnPoisition;
     private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(IPlayerInput input, SpawnFactory spawnPoisition, PauseManager pauseManager)
+	private void Construct(IPlayerInput input, SpawnFactory spawnPoisition, PauseManager pauseManager,PlayerStats playerStats)
 	{
 		_input = input;
 		_spawnPoisition = spawnPoisition;
 		_pauseManager = pauseManager;
-
+		_playerStats = playerStats;
 	}
 
 	public void OnPlayerTeleport()
 	{
 		PlayerStartTeleport.Invoke(transform.position);
+	}
+
+	public Vector3 GetSpawnPosition()
+	{
+		return _bulletSpawnPoint.position;
+	}
+
+	public void Damage(HitInfo hit)
+	{
+		_playerStats.Heals.CurrentHeals -= hit.HealsDamage;
+		_playerStats.Mana.CurrentMana -= hit.ManaDamage;
+	}
+
+	public void OnPause(bool isPause)
+	{
+		if (!isPause)
+		{
+			Reload(_attackReloadTimeLeft,_pauseManager.PauseCancellationToken.Token);
+			_moving = false;
+			_rotating = false;
+		}
 	}
 
 	private void Awake()
@@ -70,42 +93,58 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 			container.Inject(ability);
 		}
 	}
-
-
 	private void OnMoveDirectionChanged(Vector2 direction)
 	{
 		_direction = transform.rotation * new Vector3(direction.x, 0, direction.y);
-
-		if (_moveCoroutine == null)
-		{
-			_moveCoroutine = StartCoroutine(Move());
+        if (!_moving && !_pauseManager.IsPaused)
+        {
+			Move(_pauseManager.PauseCancellationToken.Token);
 		}
 	}
 
-	private IEnumerator Move()
+	private void OnMoveRotateChanged(Vector2 rotation)
 	{
-		var fixedUpdate = new WaitForFixedUpdate();
-
-		while (_direction != Vector3.zero)
+		_rotation = rotation;
+		if (!_rotating && !_pauseManager.IsPaused)
 		{
+			Rotate(_pauseManager.PauseCancellationToken.Token);
+		}
+	}
+
+	private async void Move(CancellationToken token)
+	{
+		try
+		{
+			_moving = true;
+			if (token.IsCancellationRequested)
+			{
+				_moving = false;
+				return;
+			}
 			Vector3 movement = new Vector3(_direction.x, 0.0f, _direction.z);
 			_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
-
-            var speed = Mathf.Clamp(_rigidbody.velocity.magnitude, 0, _playerStats.MaxMoveSpped);
-            _rigidbody.velocity = _rigidbody.velocity.normalized * speed;
-            yield return fixedUpdate;
+			await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
+            if (_direction.magnitude > _moveThreshold && !token.IsCancellationRequested)
+            {
+				Move(token);
+            }
+			_moving = false;
 		}
-
-		_moveCoroutine = null;
+		catch (TaskCanceledException) { }
 	}
 
-	private IEnumerator Rotate()
+	private async void Rotate(CancellationToken token)
 	{
-		while (_rotation != Vector3.zero || !_pauseManager.IsPaused)
+		try
 		{
+			_rotating = true;
+			if (token.IsCancellationRequested)
+			{
+				_rotating = false;
+				return;
+			}
 			_angleHorizontal += _rotation.x * _playerStats.RotationSpeed;
 			_angleVertical -= _rotation.y * _playerStats.RotationSpeed;
-
 
 			_angleVertical = Mathf.Clamp(_angleVertical, _playerStats.MaxUpRotation, _playerStats.MaxDownRotation);
 
@@ -114,10 +153,14 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 
 			transform.localRotation = _originRotation * rotationY;
 			_camera.localRotation = _originCameraRotation * rotationX;
-			yield return null;
+			await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
+			if (_rotation.magnitude > _rotateThreshold && !token.IsCancellationRequested)
+			{
+				Rotate(token);
+			}
+			_rotating = false;
 		}
-
-		_rotateCoroutine = null;
+		catch (TaskCanceledException) { }
 	}
 
 	private void Attack()
@@ -138,7 +181,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 		{
 			var attackAbility = ((IAttackAbillity)overrideAbility).ReloadTime;
 			overrideAbility.Execute(gameObject, this);
-			_reloadCoroutine = StartCoroutine(Reload(attackAbility));
+			Reload(attackAbility,_pauseManager.PauseCancellationToken.Token);
 			abilities.Remove(overrideAbility);
 		}
 
@@ -149,28 +192,26 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 
 	}
 
-	private IEnumerator Reload(float timer)
+	private async void Reload(float timer, CancellationToken token)
 	{
 		_attackReloadTimeLeft = timer;
-
-		while (_attackReloadTimeLeft > 0)
+		var stopwatch = new  System.Diagnostics.Stopwatch();
+		try
 		{
-			yield return null;
-			_attackReloadTimeLeft -= Time.deltaTime;
+			stopwatch.Start();
+			await Task.Delay(Mathf.RoundToInt(timer * 1000f), token);
+			if (token.IsCancellationRequested)
+				return;
+			_attackReloadTimeLeft = 0;
 		}
-		_reloadCoroutine = null;
-	}
-
-	private void OnMoveRotateChanged(Vector2 rotation)
-	{
-		_rotation = rotation;
-		if (_rotateCoroutine == null)
+		catch (TaskCanceledException) 
 		{
-			_rotateCoroutine = StartCoroutine(Rotate());
+			_attackReloadTimeLeft = timer - (float)stopwatch.Elapsed.TotalSeconds;
 		}
 
-
+		stopwatch.Stop();
 	}
+
 
 	private void OnDestroy()
 	{
@@ -178,43 +219,5 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 		_input.Rotation -= OnMoveRotateChanged;
 		_input.Fire -= Attack;
 		_pauseManager.UnsubscribeHandler(this);
-	}
-
-	public Vector3 GetSpawnPosition()
-	{
-		return _bulletSpawnPoint.position;
-	}
-
-    public void Damage(HitInfo hit)
-    {
-		_playerStats.Heals.CurrentHeals -= hit.HealsDamage;
-		_playerStats.Mana.CurrentMana -= hit.ManaDamage;
-	}
-
-	public void OnPause(bool isPause)
-	{
-		if (isPause)
-		{
-            if (_moveCoroutine != null)
-            {
-				StopCoroutine(_moveCoroutine);
-				_moveCoroutine = null;
-			}
-			if (_rotateCoroutine != null)
-			{
-				StopCoroutine(_rotateCoroutine);
-				_rotateCoroutine = null;
-			}
-
-			if (_reloadCoroutine != null)
-			{
-				StopCoroutine(_reloadCoroutine);
-				_reloadCoroutine = null;
-			}
-		}
-		else
-		{
-			_reloadCoroutine = StartCoroutine(Reload(_attackReloadTimeLeft));
-		}
 	}
 }
