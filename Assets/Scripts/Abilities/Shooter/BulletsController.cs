@@ -7,7 +7,7 @@ using System.Threading;
 
 [Serializable]
 [CreateAssetMenu(fileName = "BulletsController", menuName = "My Game/Shooter/BulletsController")]
-public class BulletsController : ScriptableObject, IPauseHandler
+public class BulletsController : ScriptableObject, IPauseHandler,IDisposable
 {
     [SerializeField] private Vector3 _spawnOffset;
 
@@ -20,14 +20,18 @@ public class BulletsController : ScriptableObject, IPauseHandler
     protected PauseManager _pauseManager;
 
     [Inject]
-    private void Construct(BulletContainer bulletContainer, PauseManager pauseManager, Dispose dispose)
+    private void Construct(BulletContainer bulletContainer, PauseManager pauseManager, DisposeOnSceneExit dispose)
     {
         _bulletContainer = bulletContainer;
         _pauseManager = pauseManager;
         _pauseManager.SubscribeHandler(this);
 
-        dispose.OnDispose += () => _pauseManager.UnsubscribeHandler(this);
 
+    }
+
+    public void Dispose()
+    {
+         _pauseManager.UnsubscribeHandler(this);
     }
 
     public virtual void Spawn(GameObject shooter)
@@ -122,4 +126,6 @@ public class BulletsController : ScriptableObject, IPauseHandler
             }
         }
     }
+
+
 }

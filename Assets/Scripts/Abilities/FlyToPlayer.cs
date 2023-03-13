@@ -5,32 +5,34 @@ using UnityEngine;
 using Zenject;
 
 [CreateAssetMenu(fileName = "FlyToPlayer", menuName = "My Game/Ability/FlyToPlayer")]
-public class FlyToPlayer : Ability, IPauseHandler
+public class FlyToPlayer : Ability, IPauseHandler, System.IDisposable
 {
     public override Specialization Specialization => Specialization.Move;
     public override WorkType WorkType => WorkType.@override;
 
     [SerializeField] private float _flySpeed;
 
-    private List<IMovable> _movables = new List<IMovable>();
+    [System.NonSerialized] private List<IMovable> _movables = new List<IMovable>();
 
-    private Player _player;
-    private PauseManager _pauseManager;
+    [System.NonSerialized] private Player _player;
+    [System.NonSerialized] private DisposeOnSceneExit _onSceneExit;
+    [System.NonSerialized] private PauseManager _pauseManager;
     [Inject]
-    private void Construct( PauseManager pauseManager, Player player)
+    private void Construct( PauseManager pauseManager, Player player, DisposeOnSceneExit onSceneExit)
     {
         _pauseManager = pauseManager;
         _player = player;
         _pauseManager.SubscribeHandler(this);
-        _player.OnPlayerDestroy += OnPlayerDestroy;
+        _onSceneExit = onSceneExit;
+        _onSceneExit.Add(this);
     }
 
-    private void OnPlayerDestroy()
+    public void Dispose()
     {
-        _player.OnPlayerDestroy -= OnPlayerDestroy;
         _movables.Clear();
         _pauseManager.UnsubscribeHandler(this);
     }
+
 
     public override void Execute(GameObject user, params object[] parameters)
     {

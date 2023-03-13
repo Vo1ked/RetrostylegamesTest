@@ -15,7 +15,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 	private Coroutine _spawnWait;
 	private float _toNextSpawn;
 
-    private ISpawnPoisition _spawnPoisition;
+    private SpawnFactory _spawnPoisition;
     private PauseManager _pauseManager;
     private DiContainer _container;
     private int _enemyIndex;
@@ -24,7 +24,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private Score _score;
 
     [Inject]
-    private void Construct(ISpawnPoisition spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
+    private void Construct(SpawnFactory spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
         IPlayerInput input, Score score)
     {
         _spawnPoisition = spawnPoisition;
@@ -36,21 +36,6 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
 
         _input.Ultimate += OnUltimate;
         pauseManager.SubscribeHandler(this);
-    }
-
-    private void OnUltimate()
-    {
-        if (_playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana)
-        {
-            var enemyToDestory = new List<Enemy>(_spawnedEnemies);
-            foreach (Enemy enemy in enemyToDestory)
-            {
-                Destroy(enemy);
-                _score.CurrentScore++;
-            }
-            _playerStats.Mana.CurrentMana = 0;
-        }
-
     }
 
     public Enemy GetNearestEnemy(Vector3 position)
@@ -73,7 +58,51 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         return nearestEnemy;
     }
 
-    void Start()
+    public void Destroy(Enemy enemy)
+    {
+        _spawnedEnemies.Remove(enemy);
+        enemy.Damaged -= OnEnemyDamage;
+        Destroy(enemy.gameObject);
+    }
+    public Vector3[] GetEnemiesPosition()
+    {
+        return _spawnedEnemies.ConvertAll(x => x.transform.position).ToArray();
+    }
+
+    public void OnPause(bool IsPause)
+    {
+        if (IsPause)
+        {
+            if (_spawnWait != null)
+            {
+                StopCoroutine(_spawnWait);
+                _spawnWait = null;
+            }
+        }
+        else
+        {
+            if (_spawnWait == null)
+            {
+                _spawnWait = StartCoroutine(SpawnWait(_toNextSpawn));
+            }
+        }
+    }
+
+    private void OnUltimate()
+    {
+        if (_playerStats.Mana.CurrentMana >= _playerStats.Mana.MaxMana)
+        {
+            var enemyToDestory = new List<Enemy>(_spawnedEnemies);
+            foreach (Enemy enemy in enemyToDestory)
+            {
+                Destroy(enemy);
+                _score.CurrentScore++;
+            }
+            _playerStats.Mana.CurrentMana = 0;
+        }
+
+    }
+    private void Start()
     {
         var container = FindObjectOfType<SceneContext>().Container;
         foreach (EnemyToSpawn enemy in _spawnPatern.enemies)
@@ -99,7 +128,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
             for (int i = 0; i < GetEnemySpawnCount(enemy); i++)
             {
                 var currentEnemy = Instantiate<Enemy>(enemy.EnemyStats.enemy,
-                    _spawnPoisition.GetSpawnPosition() + Vector3.up * enemy.EnemyStats.enemy.transform.position.y
+                    _spawnPoisition.GetSpawnPosition(SpawnType.random) + Vector3.up * enemy.EnemyStats.enemy.transform.position.y
                     , Quaternion.identity, this.transform);
                 currentEnemy.gameObject.name = enemy.EnemyStats.name + ++_enemyIndex;
                 _container.Inject(currentEnemy);
@@ -146,33 +175,6 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         _score.CurrentScore++;
         Destroy(enemy);
     }
-
-    public void Destroy(Enemy enemy)
-    {
-        _spawnedEnemies.Remove(enemy);
-        enemy.Damaged -= OnEnemyDamage;
-        Destroy(enemy.gameObject);
-    }
-
-    public void OnPause(bool IsPause)
-    {
-        if (IsPause)
-        {
-            if (_spawnWait != null)
-            {
-                StopCoroutine(_spawnWait);
-                _spawnWait = null;
-            }
-        }
-        else
-        {
-            if (_spawnWait == null)
-            {
-                _spawnWait = StartCoroutine(SpawnWait(_toNextSpawn));
-            }
-        }
-    }
-
 
 	private IEnumerator SpawnWait(float waitTime)
     {

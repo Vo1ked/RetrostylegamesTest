@@ -4,7 +4,7 @@ using UnityEngine;
 using Zenject; 
 
 [CreateAssetMenu(fileName = "ReboundPlayerBulletsController", menuName = "My Game/Shooter/ReboundPlayerBulletsController")]
-public class ReboundPlayerBulletsController : BulletsController
+public class ReboundPlayerBulletsController : BulletsController, System.IDisposable
 {
 
     [SerializeField] private float _baseReboundChance;
@@ -13,24 +13,21 @@ public class ReboundPlayerBulletsController : BulletsController
     [SerializeField] private float _healOnRebountChance;
     [SerializeField] private HitInfo _regenOnReboundHit;
 
-    private List<Bullet> _reboundedBullets = new List<Bullet>();
+    [System.NonSerialized] private List<Bullet> _reboundedBullets = new List<Bullet>();
 
-
-    private Player _player;
-    private EnemySpawner _enemySpawner;
-    private PlayerStats _playerStats;
+    [System.NonSerialized] private DisposeOnSceneExit _onSceneExit;
+    [System.NonSerialized] private EnemySpawner _enemySpawner;
+    [System.NonSerialized] private PlayerStats _playerStats;
     [Inject]
-    private void Construct(Player player, EnemySpawner enemySpawner, PlayerStats playerStats)
+    private void Construct(EnemySpawner enemySpawner, PlayerStats playerStats, DisposeOnSceneExit onSceneExit)
     {
+        _onSceneExit = onSceneExit;
         _enemySpawner = enemySpawner;
-        _player = player;
         _playerStats = playerStats;
-        _player.OnPlayerDestroy += OnPlayerDestroy;
+        _onSceneExit.Add(this);
     }
-
-    private void OnPlayerDestroy()
+    public void Dispose()
     {
-        _player.OnPlayerDestroy -= OnPlayerDestroy;
         _reboundedBullets.Clear();
         _spawnedBullets.Clear();
     }

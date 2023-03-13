@@ -6,7 +6,7 @@ using UnityEngine;
 using Zenject;
 
 [CreateAssetMenu(fileName = "FlyAtSpawn", menuName = "My Game/Ability/FlyAtSpawn")]
-public class FlyAtSpawn : Ability, IPauseHandler
+public class FlyAtSpawn : Ability, IPauseHandler,System.IDisposable
 {
 	public override Specialization Specialization => Specialization.Spawn;
 	public override WorkType WorkType => WorkType.@override;
@@ -15,25 +15,22 @@ public class FlyAtSpawn : Ability, IPauseHandler
 	[SerializeField] private float _flyUpSpeed;
 	[SerializeField] private float _afterFlyUpBeforeMoveDelay;
 
-    private Player _player;
-	private List<IMovable> _movables = new List<IMovable>();
-	private PauseManager _pauseManager;
+    [System.NonSerialized] private DisposeOnSceneExit _onSceneExit;
+	[System.NonSerialized] private List<IMovable> _movables = new List<IMovable>();
+	[System.NonSerialized] private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(PauseManager pauseManager, Player player)
+	private void Construct(PauseManager pauseManager, DisposeOnSceneExit onSceneExit)
 	{
 		_pauseManager = pauseManager;
-        _player = player;
 		_pauseManager.SubscribeHandler(this);
-
-        _player.OnPlayerDestroy += OnPlayerDestroy;
+		_onSceneExit = onSceneExit;
+		_onSceneExit.Add(this);
 	}
 
-	private void OnPlayerDestroy()
+	public void Dispose()
 	{
-		_player.OnPlayerDestroy -= OnPlayerDestroy;
 		_movables.Clear();
 		_pauseManager.UnsubscribeHandler(this);
-
 	}
 
 	public override void Execute(GameObject user, params object[] parameters)

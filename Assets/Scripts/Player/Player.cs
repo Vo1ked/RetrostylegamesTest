@@ -9,10 +9,6 @@ using Zenject;
 public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 {
 	public event Action<Vector3> PlayerStartTeleport = (Vector3) => { };
-	/// <summary>
-	/// calls for remove links in ScriptableObject at scene reload  
-	/// </summary>
-	public event Action OnPlayerDestroy = () => { };
 
 	[SerializeField] private Transform _camera;
 	[SerializeField] private Transform _bulletSpawnPoint;
@@ -34,10 +30,10 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 	private Coroutine _reloadCoroutine;
 
 	private IPlayerInput _input;
-	private ISpawnPoisition _spawnPoisition;
+	private SpawnFactory _spawnPoisition;
     private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(IPlayerInput input, ISpawnPoisition spawnPoisition, PauseManager pauseManager)
+	private void Construct(IPlayerInput input, SpawnFactory spawnPoisition, PauseManager pauseManager)
 	{
 		_input = input;
 		_spawnPoisition = spawnPoisition;
@@ -66,7 +62,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 		_input.Fire += Attack;
 		_originRotation = transform.localRotation;
 		_originCameraRotation = _camera.localRotation;
-		transform.position = _spawnPoisition.GetSpawnPosition();
+		transform.position = _spawnPoisition.GetSpawnPosition(SpawnType.random);
 
 		var container = FindObjectOfType<SceneContext>().Container;
 		foreach (Ability ability in _playerStats.Abilities)
@@ -182,7 +178,6 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 		_input.Rotation -= OnMoveRotateChanged;
 		_input.Fire -= Attack;
 		_pauseManager.UnsubscribeHandler(this);
-		OnPlayerDestroy.Invoke();
 	}
 
 	public Vector3 GetSpawnPosition()

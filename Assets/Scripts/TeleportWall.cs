@@ -2,10 +2,10 @@
 using Zenject;
 
 public class TeleportWall : MonoBehaviour {
-    private ISpawnPoisition _spawnPoisition;
+    private SpawnFactory _spawnPoisition;
 
     [Inject]
-	private void Construct(ISpawnPoisition spawnPoisition)
+	private void Construct(SpawnFactory spawnPoisition)
 	{
 		_spawnPoisition = spawnPoisition;
 	}
@@ -16,7 +16,7 @@ public class TeleportWall : MonoBehaviour {
         if (player != null)
         {
 			player.OnPlayerTeleport();
-			player.transform.position = _spawnPoisition.GetSpawnPosition();
+			player.transform.position = _spawnPoisition.GetSpawnPosition(SpawnType.farthestSpawnFromEnemies);
         }
     }
 }
