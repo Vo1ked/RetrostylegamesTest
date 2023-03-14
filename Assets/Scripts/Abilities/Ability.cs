@@ -1,37 +1,40 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Ability : ScriptableObject
+namespace RetroStyleGamesTest.Abillity
 {
-    public virtual Specialization Specialization { get; protected set; }
-    public virtual WorkType WorkType { get; protected set; }
-    public abstract void Execute(GameObject user, params object[] parameters);
-
-    public static bool AbilityCheck(List<Ability> allabilities, Specialization specialization, ref List<Ability> abilities)
+    public abstract class Ability : ScriptableObject
     {
-        if (allabilities.Count < 1)
-            return false;
+        public virtual Specialization Specialization { get; protected set; }
+        public virtual WorkType WorkType { get; protected set; }
+        public abstract void Execute(GameObject user, params object[] parameters);
 
-        abilities = allabilities.FindAll(abbility => abbility.Specialization == specialization);
-        var overrideAbilities = abilities.FindAll(abbility => abbility.WorkType == WorkType.@override);
-        if (overrideAbilities.Count > 1)
+        public static bool AbilityCheck(List<Ability> allabilities, Specialization specialization, ref List<Ability> abilities)
         {
-            Debug.LogError($"override abiliries with specialization {overrideAbilities[0].Specialization} more that one! will work only one");
-        }
-        return abilities.Count > 0;
-    }
-}
+            if (allabilities.Count < 1)
+                return false;
 
-public enum Specialization
-{
-    Spawn,
-    Move,
-    Attack,
-    Damage,
-    OnDestroy
-}
-public enum WorkType
-{
-    addition,
-    @override
+            abilities = allabilities.FindAll(abbility => abbility.Specialization == specialization);
+            var overrideAbilities = abilities.FindAll(abbility => abbility.WorkType == WorkType.@override);
+            if (overrideAbilities.Count > 1)
+            {
+                Debug.LogError($"override abiliries with specialization {overrideAbilities[0].Specialization} more that one! will work only one");
+            }
+            return abilities.Count > 0;
+        }
+    }
+
+    public enum Specialization
+    {
+        Spawn,
+        Move,
+        Attack,
+        Damage,
+        OnDestroy
+    }
+    public enum WorkType
+    {
+        addition,
+        @override
+    }
 }

@@ -2,33 +2,36 @@
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIOptionsPopup : MonoBehaviour
+namespace RetroStyleGamesTest.UI
 {
-    public System.Action Closed = () => { };
-
-    [SerializeField] private Button _closeButton;
-    [SerializeField] private Button _restartButton;
-
-    private void OnEnable()
+    public class UIOptionsPopup : MonoBehaviour
     {
-        _closeButton.onClick.AddListener(OnClose);
-        _restartButton.onClick.AddListener(OnRestart);
-    }
+        public System.Action Closed = () => { };
 
-    private void OnDisable()
-    {
-        _closeButton.onClick.RemoveListener(OnClose);
-        _restartButton.onClick.RemoveListener(OnRestart);
-    }
+        [SerializeField] private Button _closeButton;
+        [SerializeField] private Button _restartButton;
 
-    private void OnRestart()
-    {
-        SceneManager.LoadScene("SampleScene");
-    }
+        private void OnEnable()
+        {
+            _closeButton.onClick.AddListener(OnClose);
+            _restartButton.onClick.AddListener(OnRestart);
+        }
 
-    private void OnClose()
-    {
-        Closed.Invoke();
-        gameObject.SetActive(false);
+        private void OnDisable()
+        {
+            _closeButton.onClick.RemoveListener(OnClose);
+            _restartButton.onClick.RemoveListener(OnRestart);
+        }
+
+        private void OnRestart()
+        {
+            SceneManager.LoadScene("SampleScene");
+        }
+
+        private void OnClose()
+        {
+            Closed.Invoke();
+            gameObject.SetActive(false);
+        }
     }
 }

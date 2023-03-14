@@ -1,10 +1,15 @@
 ﻿using UnityEngine;
 using Zenject;
+using RetroStyleGamesTest.Data;
 
-public class GameProjectContext : MonoInstaller {
-    [SerializeField] private PlayerStats _playerStats;
-    public override void InstallBindings()
+namespace RetroStyleGamesTest.Zenject
+{
+    public class GameProjectContext : MonoInstaller
     {
-        Container.Bind<PlayerStats>().FromInstance(_playerStats).AsSingle();
+        [SerializeField] private PlayerStats _playerStats;
+        public override void InstallBindings()
+        {
+            Container.Bind<PlayerStats>().FromInstance(_playerStats).AsSingle();
+        }
     }
 }

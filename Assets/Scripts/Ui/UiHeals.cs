@@ -1,31 +1,35 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using RetroStyleGamesTest.Data;
 
-public class UiHeals : MonoBehaviour
+namespace RetroStyleGamesTest.UI
 {
-	[SerializeField] private Text _counter;
-
-	private PlayerStats _playerStats;
-	[Inject]
-	private void Construct(PlayerStats playerStats)
+	public class UiHeals : MonoBehaviour
 	{
-		_playerStats = playerStats;
-	}
+		[SerializeField] private Text _counter;
 
-	private void OnEnable()
-	{
-		_playerStats.Heals.HealsChanged += OnHealsChanged;
-		OnHealsChanged(_playerStats.Heals.CurrentHeals);
-	}
+		private PlayerStats _playerStats;
+		[Inject]
+		private void Construct(PlayerStats playerStats)
+		{
+			_playerStats = playerStats;
+		}
 
-	private void OnHealsChanged(int currentHeals)
-	{
-		_counter.text = currentHeals.ToString();
-	}
+		private void OnEnable()
+		{
+			_playerStats.Heals.HealsChanged += OnHealsChanged;
+			OnHealsChanged(_playerStats.Heals.CurrentHeals);
+		}
 
-	private void OnDisable()
-	{
-		_playerStats.Heals.HealsChanged -= OnHealsChanged;
+		private void OnHealsChanged(int currentHeals)
+		{
+			_counter.text = currentHeals.ToString();
+		}
+
+		private void OnDisable()
+		{
+			_playerStats.Heals.HealsChanged -= OnHealsChanged;
+		}
 	}
 }
