@@ -12,13 +12,13 @@ public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
     [SerializeField] protected BulletsStats _bulletsStats;
     [SerializeField] private Vector3 _spawnOffset;
 
-    [NonSerialized] protected List<Bullet> _spawnedBullets = new List<Bullet>();
     protected static float _autoDeleteTimer = 60;
+
+    [NonSerialized] protected List<Bullet> _spawnedBullets = new List<Bullet>();
     [NonSerialized] protected int _bulletIndex;
 
     [NonSerialized] protected BulletContainer _bulletContainer;
     [NonSerialized] protected PauseManager _pauseManager;
-
     [Inject]
     private void Construct(BulletContainer bulletContainer, PauseManager pauseManager, DisposeOnSceneExit dispose)
     {
@@ -41,7 +41,6 @@ public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
         _spawnedBullet.TimeToDeleteLeft = _autoDeleteTimer;
         _spawnedBullet.Shooter = shooter;
         _spawnedBullets.Add(_spawnedBullet);
-        //Debug.LogError($"Bullet {_spawnedBullet.name} Shotter = {shooter.name} Spawn position {spawnPosition} _bulletContainer = {_spawnedBullet.transform.parent.name} ");
 
         Move(_spawnedBullet);
     }
@@ -49,7 +48,8 @@ public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
     public virtual void Move(Bullet bullet)
     {
         bullet.transform.LookAt(bullet.Shooter.transform);
-        bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+        bullet.DestroyCancellationToken = CancellationTokenSource
+            .CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
         MoveForward(bullet, bullet.DestroyCancellationToken.Token);
     }
     public virtual void Dispose()
@@ -66,7 +66,8 @@ public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
         {
             foreach (Bullet bullet in _spawnedBullets)
             {
-                bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+                bullet.DestroyCancellationToken = CancellationTokenSource
+                    .CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
                 MoveForward(bullet, bullet.DestroyCancellationToken.Token);
             }
         }
@@ -113,7 +114,8 @@ public class BulletsController : ScriptableObject, IPauseHandler, IDisposable
             {
                 return;
             }
-            rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward * _bulletsStats.Speed * Time.deltaTime);
+            rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward
+                * _bulletsStats.Speed * Time.deltaTime);
             try
             {
                 await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);

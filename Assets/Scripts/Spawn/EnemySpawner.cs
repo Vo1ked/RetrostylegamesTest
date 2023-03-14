@@ -4,17 +4,17 @@ using Zenject;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class EnemySpawner : MonoBehaviour , IPauseHandler{
+public class EnemySpawner : MonoBehaviour, IPauseHandler
+{
+    [SerializeField] private SpawnPatern _spawnPatern;
 
-	[SerializeField] private SpawnPatern _spawnPatern;
+    private List<Enemy> _spawnedEnemies = new List<Enemy>();
 
-	private List<Enemy> _spawnedEnemies = new List<Enemy>();
+    private float _currentDelay;
+    private float _currentMultiplier;
+    private float _toNextSpawn;
 
-	private float _currentDelay;
-	private float _currentMultiplier;
-	private float _toNextSpawn;
-
-    private SpawnFactory _spawnPoisition;
+    private SpawnPositionFactory _spawnPoisition;
     private PauseManager _pauseManager;
     private DiContainer _container;
     private int _enemyIndex;
@@ -23,7 +23,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     private Score _score;
 
     [Inject]
-    private void Construct(SpawnFactory spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
+    private void Construct(SpawnPositionFactory spawnPoisition, PauseManager pauseManager, PlayerStats playerStats, DiContainer container,
         IPlayerInput input, Score score)
     {
         _spawnPoisition = spawnPoisition;
@@ -109,7 +109,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
     {
         if (_spawnPatern.enemies.Count < 1)
         {
-            Debug.LogError("No enemies in spawn patern! "+ _spawnPatern.name);
+            Debug.LogError("No enemies in spawn patern! " + _spawnPatern.name);
         }
         foreach (EnemyToSpawn enemy in _spawnPatern.enemies)
         {
@@ -126,7 +126,7 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
             }
         }
         ChangeSpawnDelay();
-        SpawnWait(_currentDelay,_pauseManager.PauseCancellationToken.Token);
+        SpawnWait(_currentDelay, _pauseManager.PauseCancellationToken.Token);
     }
 
     private int GetEnemySpawnCount(EnemyToSpawn enemyToSpawn)
@@ -164,10 +164,10 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         Destroy(enemy);
     }
 
-	private async void SpawnWait(float waitTime, CancellationToken token)
+    private async void SpawnWait(float waitTime, CancellationToken token)
     {
-		_toNextSpawn = waitTime;
-		var stopwatch = new  System.Diagnostics.Stopwatch();
+        _toNextSpawn = waitTime;
+        var stopwatch = new System.Diagnostics.Stopwatch();
         try
         {
             await Task.Delay(Mathf.RoundToInt(waitTime * 1000f), token);
@@ -189,5 +189,4 @@ public class EnemySpawner : MonoBehaviour , IPauseHandler{
         _pauseManager.UnsubscribeHandler(this);
         _input.Ultimate -= OnUltimate;
     }
-
 }

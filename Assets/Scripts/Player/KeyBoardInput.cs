@@ -2,7 +2,8 @@
 using UnityEngine;
 using Zenject;
 
-public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
+public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler
+{
     public event Action<Vector2> Direction = (Vector2) => { };
     public event Action<Vector2> Rotation = (Vector2) => { };
     public event Action Fire = () => { };
@@ -11,7 +12,7 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
     private PauseManager _pauseManager;
     private UiManager _uiManager;
     [Inject]
-    private void Construct(PauseManager pauseManager,UiManager uiManager)
+    private void Construct(PauseManager pauseManager, UiManager uiManager)
     {
         _pauseManager = pauseManager;
         _uiManager = uiManager;
@@ -33,7 +34,7 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
         }
     }
 
-    void Start()
+    private void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -41,8 +42,7 @@ public class KeyBoardInput : MonoBehaviour, IPlayerInput, IPauseHandler {
 
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetButton("Cancel"))
         {

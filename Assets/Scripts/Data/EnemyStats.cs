@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
 [CreateAssetMenu(fileName = "EnemyStats", menuName = "My Game/EnemyStats")]
-public class EnemyStats : ScriptableObject {
-
+public class EnemyStats : ScriptableObject
+{
 	public new string name;
 	public Enemy enemy;
 	public int Heals;

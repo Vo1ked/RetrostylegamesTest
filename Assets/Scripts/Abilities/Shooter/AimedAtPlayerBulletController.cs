@@ -29,6 +29,13 @@ public class AimedAtPlayerBulletController : BulletsController
         _spawnedBullets.Clear();
     }
 
+    public override void Move(Bullet bullet)
+    {
+        bullet.transform.LookAt(_player.transform);
+        bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+        MoveToPlayer(bullet, bullet.DestroyCancellationToken.Token);
+    }
+
     private void OnPlayerTeleported(Vector3 lastPosition)
     {
         var bulletsToRemove = new List<Bullet>(_spawnedBullets);
@@ -54,30 +61,24 @@ public class AimedAtPlayerBulletController : BulletsController
         _loseTargetBullets.Remove(bullet);
     }
 
-    public override void Move(Bullet bullet)
-    {
-        bullet.transform.LookAt(_player.transform);
-        bullet.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
-        MoveToPlayer(bullet, bullet.DestroyCancellationToken.Token);
-    }
-
     private async void MoveToPlayer(Bullet bullet, CancellationToken token)
     {
         var rigidBody = bullet.GetComponent<Rigidbody>();
-        while (bullet.TimeToDeleteLeft > 0)
+        try
         {
-            if (token.IsCancellationRequested)
+            while (bullet.TimeToDeleteLeft > 0)
             {
-                return;
-            }
-            var direction = (_player.transform.position - bullet.transform.position).normalized;
-            rigidBody.MovePosition(bullet.transform.position + direction * _bulletsStats.Speed * Time.deltaTime);
-            bullet.TimeToDeleteLeft -= Time.deltaTime;
-            try
-            {
+                if (token.IsCancellationRequested)
+                    return;
+
+                var direction = (_player.transform.position - bullet.transform.position).normalized;
+                rigidBody.MovePosition(bullet.transform.position + direction
+                    * _bulletsStats.Speed * Time.deltaTime);
+                bullet.TimeToDeleteLeft -= Time.deltaTime;
+
                 await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
             }
-            catch (TaskCanceledException) { }
         }
+        catch (TaskCanceledException) { }
     }
 }

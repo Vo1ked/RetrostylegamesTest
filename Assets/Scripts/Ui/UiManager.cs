@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class UiManager : MonoBehaviour {
+public class UiManager : MonoBehaviour
+{
 
 	[SerializeField] private Button _options;
 	[SerializeField] private UIOptionsPopup _optionsPopup;
 	[SerializeField] private UiGameOverPopup _gameOverPopup;
-
-
 
 	private PauseManager _pauseManager;
 	private PlayerStats _playerStats;
@@ -24,27 +20,8 @@ public class UiManager : MonoBehaviour {
 		_playerStats.Heals.HealsChanged += OnDie;
 	}
 
-    private void OnDie(int heals)
-    {
-        if (heals < 1)
-        {
-			_pauseManager.SetPause(true);
-			_gameOverPopup.gameObject.SetActive(true);
-        }
-    }
-
-    void Start () 
-	{
-		_options.onClick.AddListener(OnOptionsClick);
-	}
-	private void OnDestroy()
-    {
-		_playerStats.Heals.HealsChanged -= OnDie;
-		OnOptionsClose();
-	}
-
 	public void OnOptionsClick()
-    {
+	{
 		if (_pauseManager.IsPaused)
 			return;
 		_pauseManager.SetPause(true);
@@ -52,8 +29,28 @@ public class UiManager : MonoBehaviour {
 		_optionsPopup.Closed += OnOptionsClose;
 	}
 
-    private void OnOptionsClose()
-    {
+	private void OnDie(int heals)
+	{
+		if (heals < 1)
+		{
+			_pauseManager.SetPause(true);
+			_gameOverPopup.gameObject.SetActive(true);
+		}
+	}
+
+	private void Start()
+	{
+		_options.onClick.AddListener(OnOptionsClick);
+	}
+
+	private void OnDestroy()
+	{
+		_playerStats.Heals.HealsChanged -= OnDie;
+		OnOptionsClose();
+	}
+
+	private void OnOptionsClose()
+	{
 		_optionsPopup.Closed -= OnOptionsClose;
 		_pauseManager.SetPause(false);
 	}

@@ -1,7 +1,7 @@
-﻿
-public class Score  {
-	private int _currentScore;
-	public int CurrentScore
+﻿public class Score
+{
+    private int _currentScore;
+    public int CurrentScore
     {
         get { return _currentScore; }
         set
@@ -10,5 +10,5 @@ public class Score  {
             ScoreChanged?.Invoke(_currentScore);
         }
     }
-	public System.Action<int> ScoreChanged;
+    public System.Action<int> ScoreChanged;
 }

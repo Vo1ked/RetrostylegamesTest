@@ -2,10 +2,10 @@
 using Zenject;
 
 public class TeleportWall : MonoBehaviour {
-    private SpawnFactory _spawnPoisition;
+    private SpawnPositionFactory _spawnPoisition;
 
     [Inject]
-	private void Construct(SpawnFactory spawnPoisition)
+	private void Construct(SpawnPositionFactory spawnPoisition)
 	{
 		_spawnPoisition = spawnPoisition;
 	}

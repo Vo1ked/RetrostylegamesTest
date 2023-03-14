@@ -11,7 +11,6 @@ public class SpawnPatern : ScriptableObject
 	public float EnemyMultplierSpawnRate;
 	public float MaxEnemyMultplierSpawnRate;
 	public List<EnemyToSpawn> enemies;
-
 }
 
 [System.Serializable]

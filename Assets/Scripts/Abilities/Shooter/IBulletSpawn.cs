@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public interface IBulletSpawn {
-
+public interface IBulletSpawn
+{
 	Vector3 GetSpawnPosition();
 }

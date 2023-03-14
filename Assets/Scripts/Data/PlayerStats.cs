@@ -3,8 +3,8 @@ using UnityEngine;
 using System;
 
 [CreateAssetMenu(fileName = "PlayerStats", menuName = "My Game/PlayerStats")]
-public class PlayerStats : ScriptableObject {
-
+public class PlayerStats : ScriptableObject
+{
     public Heals Heals;
     [Space]
     public Mana Mana;
@@ -16,6 +16,7 @@ public class PlayerStats : ScriptableObject {
 
     public List<Ability> Abilities;
 }
+
 [Serializable]
 public class Heals
 {
@@ -33,6 +34,7 @@ public class Heals
     }
     public event Action<int> HealsChanged;
 }
+
 [Serializable]
 public class Mana
 {
@@ -50,5 +52,4 @@ public class Mana
         }
     }
     public event Action<int> CurrentManaChanged;
-
 }

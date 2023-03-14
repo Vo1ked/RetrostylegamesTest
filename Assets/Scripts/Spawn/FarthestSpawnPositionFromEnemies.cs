@@ -3,7 +3,6 @@ using Zenject;
 
 public class FarthestSpawnPositionFromEnemies : ISpawnType
 {
-
     private EnemySpawner _enemySpawner;
 
     public SpawnType type => SpawnType.farthestSpawnFromEnemies;

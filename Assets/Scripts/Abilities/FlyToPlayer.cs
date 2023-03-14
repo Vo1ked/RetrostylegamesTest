@@ -18,7 +18,7 @@ public class FlyToPlayer : Ability, IPauseHandler, System.IDisposable
     [System.NonSerialized] private DisposeOnSceneExit _onSceneExit;
     [System.NonSerialized] private PauseManager _pauseManager;
     [Inject]
-    private void Construct( PauseManager pauseManager, Player player, DisposeOnSceneExit onSceneExit)
+    private void Construct(PauseManager pauseManager, Player player, DisposeOnSceneExit onSceneExit)
     {
         _pauseManager = pauseManager;
         _player = player;
@@ -33,12 +33,25 @@ public class FlyToPlayer : Ability, IPauseHandler, System.IDisposable
         _pauseManager.UnsubscribeHandler(this);
     }
 
-
     public override void Execute(GameObject user, params object[] parameters)
     {
         var movable = user.GetComponent<IMovable>();
         Fly(movable, _pauseManager.PauseCancellationToken.Token);
         _movables.Add(movable);
+    }
+
+    public void OnPause(bool IsPause)
+    {
+        if (_movables.Count < 1)
+            return;
+
+        if (!IsPause)
+        {
+            foreach (IMovable movable in _movables)
+            {
+                Fly(movable, _pauseManager.PauseCancellationToken.Token);
+            }
+        }
     }
 
     private async void Fly(IMovable movable, CancellationToken token)
@@ -61,19 +74,5 @@ public class FlyToPlayer : Ability, IPauseHandler, System.IDisposable
             Fly(movable, token);
         }
         catch (TaskCanceledException) { }
-    }
-
-    public void OnPause(bool IsPause)
-    {
-        if (_movables.Count < 1)
-            return;
-
-        if (!IsPause)
-        {
-            foreach (IMovable movable in _movables)
-            {
-                Fly(movable, _pauseManager.PauseCancellationToken.Token);
-            }
-        }
     }
 }

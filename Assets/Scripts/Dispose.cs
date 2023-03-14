@@ -1,7 +1,6 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using System;
 
-public class Dispose {
+public class Dispose 
+{
 	public  Action OnDispose;
 }

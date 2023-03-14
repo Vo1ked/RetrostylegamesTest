@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 [CreateAssetMenu(fileName = "Shooter", menuName = "My Game/Ability/Shooter")]
@@ -15,22 +13,29 @@ public class Shooter : Ability, IAttackAbillity
 
     float IAttackAbillity.ReloadTime => ReloadTime;
     float IAttackAbillity.AttackRange => Range;
-    
+
+    private bool Inited;
 
     [SerializeField] private BulletsController Bullet;
 
+    [System.NonSerialized] private DiContainer _container;
     [Inject]
     private void Construct(DiContainer container)
     {
-        container.Inject(Bullet);
+        _container = container;
     }
 
     public override void Execute(GameObject user, params object[] parameters)
     {
+        TryInit();
         Bullet.Spawn(user);
     }
 
+    private void TryInit()
+    {
+        if (Inited)
+            return;
 
-
-
+        _container.Inject(Bullet);
+    }
 }

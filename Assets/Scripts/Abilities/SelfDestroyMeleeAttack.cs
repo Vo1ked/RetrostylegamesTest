@@ -2,19 +2,19 @@
 using Zenject;
 
 [CreateAssetMenu(fileName = "SelfDestroyMeleeAttack", menuName = "My Game/Ability/SelfDestroyMeleeAttack")]
-public class SelfDestroyMeleeAttack : Ability, IAttackAbillity {
-
+public class SelfDestroyMeleeAttack : Ability, IAttackAbillity
+{
     public override Specialization Specialization => Specialization.Attack;
     public override WorkType WorkType => WorkType.@override;
-    [SerializeField] private float ReloadTime;
-    [SerializeField] private float Range = 2;
     public HitInfo HitInfo;
 
+    [SerializeField] private float ReloadTime;
+    [SerializeField] private float Range = 2;
 
     float IAttackAbillity.ReloadTime => ReloadTime;
     float IAttackAbillity.AttackRange => Range;
 
-	private Player _player;
+    private Player _player;
     private EnemySpawner _enemySpawner;
     [Inject]
     private void Construct(EnemySpawner enemySpawner, Player player)
@@ -36,5 +36,4 @@ public class SelfDestroyMeleeAttack : Ability, IAttackAbillity {
             }
         }
     }
-
 }

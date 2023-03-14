@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class UiScore : MonoBehaviour {
+public class UiScore : MonoBehaviour
+{
 
 	[SerializeField] private Text _counter;
 

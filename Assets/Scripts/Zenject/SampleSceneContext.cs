@@ -13,7 +13,7 @@ public class SampleSceneContext : MonoInstaller{
 #endif
         _disposeOnSceneExit = new DisposeOnSceneExit();
         Container.Bind<DisposeOnSceneExit>().FromInstance(_disposeOnSceneExit).AsSingle();
-        Container.Bind<SpawnFactory>().AsSingle();
+        Container.Bind<SpawnPositionFactory>().AsSingle();
         Container.Bind<EnemySpawner>().FromComponentInHierarchy().AsSingle();
         Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
         Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
@@ -44,5 +44,4 @@ public class DisposeOnSceneExit
         _disposables.ForEach(x => x.Dispose());
         _disposables.Clear();
     }
-
 }

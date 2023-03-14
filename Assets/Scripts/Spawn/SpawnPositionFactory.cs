@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Zenject;
 
-public class SpawnFactory
+public class SpawnPositionFactory
 {
     private readonly List<ISpawnType> _spawnTypes = new List<ISpawnType>()
     {

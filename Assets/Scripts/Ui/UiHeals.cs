@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class UiHeals : MonoBehaviour {
-
+public class UiHeals : MonoBehaviour
+{
 	[SerializeField] private Text _counter;
 
 	private PlayerStats _playerStats;
@@ -17,15 +14,15 @@ public class UiHeals : MonoBehaviour {
 	}
 
 	private void OnEnable()
-    {
+	{
 		_playerStats.Heals.HealsChanged += OnHealsChanged;
 		OnHealsChanged(_playerStats.Heals.CurrentHeals);
-    }
+	}
 
-    private void OnHealsChanged(int currentHeals)
-    {
+	private void OnHealsChanged(int currentHeals)
+	{
 		_counter.text = currentHeals.ToString();
-    }
+	}
 
 	private void OnDisable()
 	{

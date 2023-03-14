@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,10 +31,10 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 
 	private PlayerStats _playerStats;
 	private IPlayerInput _input;
-	private SpawnFactory _spawnPoisition;
-    private PauseManager _pauseManager;
+	private SpawnPositionFactory _spawnPoisition;
+	private PauseManager _pauseManager;
 	[Inject]
-	private void Construct(IPlayerInput input, SpawnFactory spawnPoisition, PauseManager pauseManager,PlayerStats playerStats)
+	private void Construct(IPlayerInput input, SpawnPositionFactory spawnPoisition, PauseManager pauseManager, PlayerStats playerStats)
 	{
 		_input = input;
 		_spawnPoisition = spawnPoisition;
@@ -63,7 +62,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 	{
 		if (!isPause)
 		{
-			Reload(_attackReloadTimeLeft,_pauseManager.PauseCancellationToken.Token);
+			Reload(_attackReloadTimeLeft, _pauseManager.PauseCancellationToken.Token);
 			_moving = false;
 			_rotating = false;
 		}
@@ -96,8 +95,8 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 	private void OnMoveDirectionChanged(Vector2 direction)
 	{
 		_direction = transform.rotation * new Vector3(direction.x, 0, direction.y);
-        if (!_moving && !_pauseManager.IsPaused)
-        {
+		if (!_moving && !_pauseManager.IsPaused)
+		{
 			Move(_pauseManager.PauseCancellationToken.Token);
 		}
 	}
@@ -124,10 +123,10 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 			Vector3 movement = new Vector3(_direction.x, 0.0f, _direction.z);
 			_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
 			await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
-            if (_direction.magnitude > _moveThreshold && !token.IsCancellationRequested)
-            {
+			if (_direction.magnitude > _moveThreshold && !token.IsCancellationRequested)
+			{
 				Move(token);
-            }
+			}
 			_moving = false;
 		}
 		catch (TaskCanceledException) { }
@@ -181,7 +180,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 		{
 			var attackAbility = ((IAttackAbillity)overrideAbility).ReloadTime;
 			overrideAbility.Execute(gameObject, this);
-			Reload(attackAbility,_pauseManager.PauseCancellationToken.Token);
+			Reload(attackAbility, _pauseManager.PauseCancellationToken.Token);
 			abilities.Remove(overrideAbility);
 		}
 
@@ -195,7 +194,7 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 	private async void Reload(float timer, CancellationToken token)
 	{
 		_attackReloadTimeLeft = timer;
-		var stopwatch = new  System.Diagnostics.Stopwatch();
+		var stopwatch = new System.Diagnostics.Stopwatch();
 		try
 		{
 			stopwatch.Start();
@@ -204,14 +203,13 @@ public class Player : MonoBehaviour, IBulletSpawn, IDamageble, IPauseHandler
 				return;
 			_attackReloadTimeLeft = 0;
 		}
-		catch (TaskCanceledException) 
+		catch (TaskCanceledException)
 		{
 			_attackReloadTimeLeft = timer - (float)stopwatch.Elapsed.TotalSeconds;
 		}
 
 		stopwatch.Stop();
 	}
-
 
 	private void OnDestroy()
 	{

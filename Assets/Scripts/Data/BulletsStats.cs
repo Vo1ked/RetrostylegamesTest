@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "BulletsStats", menuName = "My Game/Shooter/BulletsStats")]
 public class BulletsStats : ScriptableObject
@@ -9,5 +8,4 @@ public class BulletsStats : ScriptableObject
     [HideInInspector] public GameObject Shooter;
     public float Speed;
     public HitInfo HitInfo;
-
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 
-public class UiStick : MonoBehaviour, 
+public class UiStick : MonoBehaviour,
     IPointerDownHandler, IPointerUpHandler, IDragHandler, IPauseHandler
 {
     public Action<Vector2> OnPositionChanged = (Vector2) => { };

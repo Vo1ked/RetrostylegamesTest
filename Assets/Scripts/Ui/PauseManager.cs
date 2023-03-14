@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
-public class PauseManager: System.IDisposable
+public class PauseManager : System.IDisposable
 {
-    public bool IsPaused { get; private set; } = false;
     public CancellationTokenSource PauseCancellationToken;
+    public bool IsPaused { get; private set; }
 
-	private List<IPauseHandler> _pauseHandlers;
+    private List<IPauseHandler> _pauseHandlers;
 
     public PauseManager()
     {
@@ -16,12 +14,12 @@ public class PauseManager: System.IDisposable
         _pauseHandlers = new List<IPauseHandler>();
     }
 
-	public void SubscribeHandler(IPauseHandler pauseHandler)
+    public void SubscribeHandler(IPauseHandler pauseHandler)
     {
-		_pauseHandlers.Add(pauseHandler);
+        _pauseHandlers.Add(pauseHandler);
     }
 
-	public void UnsubscribeHandler(IPauseHandler pauseHandler)
+    public void UnsubscribeHandler(IPauseHandler pauseHandler)
     {
         _pauseHandlers.Remove(pauseHandler);
     }

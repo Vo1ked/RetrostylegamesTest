@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using Zenject; 
+using Zenject;
 
 [CreateAssetMenu(fileName = "ReboundPlayerBulletsController", menuName = "My Game/Shooter/ReboundPlayerBulletsController")]
 public class ReboundPlayerBulletsController : BulletsController
 {
-
     [SerializeField] private float _baseReboundChance;
     [SerializeField] private float _addingStep;
     [SerializeField] private float _missingHealsPercentForStep;
@@ -51,7 +49,9 @@ public class ReboundPlayerBulletsController : BulletsController
             Destroy(bullet);
         }
 
-        var reboundChance = _baseReboundChance + _addingStep * ((1 - (float)_playerStats.Heals.CurrentHeals / _playerStats.Heals.MaxHeals) / _missingHealsPercentForStep);
+        var reboundChance = _baseReboundChance + _addingStep 
+            * ((1 - (float)_playerStats.Heals.CurrentHeals / _playerStats.Heals.MaxHeals) 
+            / _missingHealsPercentForStep);
         var random = Random.value;
         if (reboundChance > random)
         {
@@ -63,7 +63,8 @@ public class ReboundPlayerBulletsController : BulletsController
                 return;
             }
 
-            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position - enemy.transform.position);
+            bullet.transform.rotation = Quaternion.LookRotation(bullet.transform.position 
+                - enemy.transform.position);
         }
     }
 }

@@ -6,7 +6,7 @@ using Zenject;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, IMovable
+public class Enemy : MonoBehaviour, IDamageble, IBulletSpawn, IPauseHandler, IMovable
 {
     public event System.Action<Enemy, HitInfo> Damaged = (Enemy, HitInfo) => { };
     public int CurrentHeals;
@@ -24,7 +24,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
     private PauseManager _pauseManager;
     private Player _player;
-
     [Inject]
     private void Construct(PauseManager pauseManager, Player player)
     {
@@ -52,7 +51,8 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
     {
         EnemyStats = stats;
         CurrentHeals = EnemyStats.StartHeals;
-        _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+        _destroyCancellationToken = CancellationTokenSource
+            .CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
 
         List<Ability> abilities = new List<Ability>();
         if (!Ability.AbilityCheck(EnemyStats.Abilities, Specialization.Spawn, ref abilities))
@@ -87,7 +87,8 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
 
         if (!isPause)
         {
-            _destroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
+            _destroyCancellationToken = CancellationTokenSource
+                .CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
             Move(_destroyCancellationToken.Token);
 
             if (_attackReloadTimeLeft > 0)
@@ -97,18 +98,18 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         }
     }
 
-    private void AfterCustomSpawnMove()
-    {
-        StartMove();
-        Attack();
-        CompletedMove -= AfterCustomSpawnMove;
-    }
-
     public void StartMove()
     {
         if (_destroyCancellationToken.Token.IsCancellationRequested)
             return;
         Move(_destroyCancellationToken.Token);
+    }
+
+    private void AfterCustomSpawnMove()
+    {
+        StartMove();
+        Attack();
+        CompletedMove -= AfterCustomSpawnMove;
     }
 
     private async void Move(CancellationToken token)
@@ -120,7 +121,7 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             _agent.SetDestination(_player.transform.position);
             try
             {
-                await Task.Delay(pathUpdateDelay,token);
+                await Task.Delay(pathUpdateDelay, token);
             }
             catch (TaskCanceledException) { }
             if (token.IsCancellationRequested)
@@ -137,7 +138,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
             overrideAbility.Execute(gameObject);
         }
     }
-
 
     private void Attack()
     {
@@ -169,7 +169,6 @@ public class Enemy : MonoBehaviour, IDamageble , IBulletSpawn , IPauseHandler, I
         if (_attackAbillity != null)
             return _attackAbillity;
 
-        
         return _attackAbillity = ability as IAttackAbillity;
     }
 

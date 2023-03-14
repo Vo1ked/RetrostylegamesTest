@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 
-public class SpawnByRandomRadius : ISpawnType {
+public class SpawnByRandomRadius : ISpawnType
+{
     public SpawnType type => SpawnType.random;
 
     public Vector3 GetSpawnPosition()
     {
-        Vector3 middlePoint = new Vector3(0, 0.2f, 0);
+        Vector3 middlePoint = new Vector3(0, 0.26f, 0);
         float circleRadius = 4;
         var tryCount = 100;
         var tries = 0;
@@ -19,7 +20,7 @@ public class SpawnByRandomRadius : ISpawnType {
         return result;
     }
 
-    private Vector3 GetPosition(Vector3 middlePoint,float circleRadius)
+    private Vector3 GetPosition(Vector3 middlePoint, float circleRadius)
     {
         var random = Random.insideUnitCircle;
         return new Vector3(middlePoint.x + random.x * circleRadius,
@@ -29,8 +30,6 @@ public class SpawnByRandomRadius : ISpawnType {
 
     private bool ValidatePosition(Vector3 position)
     {
-        RaycastHit hit;
-        return !Physics.SphereCast(position, 0.5f, Vector3.zero, out hit);
+        return !Physics.SphereCast(position, 0.5f, Vector3.zero, out _);
     }
-
 }

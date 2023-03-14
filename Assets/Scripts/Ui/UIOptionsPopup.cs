@@ -1,14 +1,13 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIOptionsPopup : MonoBehaviour {
+public class UIOptionsPopup : MonoBehaviour
+{
+    public System.Action Closed = () => { };
 
-    public Action Closed = () => { };
-
-	[SerializeField] private Button _closeButton;
-	[SerializeField] private Button _restartButton;
+    [SerializeField] private Button _closeButton;
+    [SerializeField] private Button _restartButton;
 
     private void OnEnable()
     {
@@ -32,9 +31,4 @@ public class UIOptionsPopup : MonoBehaviour {
         Closed.Invoke();
         gameObject.SetActive(false);
     }
-
-    // Update is called once per frame
-    void Update () {
-		
-	}
 }
