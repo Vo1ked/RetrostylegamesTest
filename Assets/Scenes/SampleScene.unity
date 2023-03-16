@@ -3721,7 +3721,7 @@ MonoBehaviour:
   m_MovementRange: 75
   m_DynamicOriginRange: 120
   m_ControlPath: <Gamepad>/leftStick
-  m_Behaviour: 1
+  m_Behaviour: 0
   m_UseIsolatedInputActions: 0
   m_PointerDownAction:
     m_Name: Pointer Down
@@ -7524,7 +7524,7 @@ MonoBehaviour:
   m_MovementRange: 75
   m_DynamicOriginRange: 150
   m_ControlPath: <Gamepad>/rightStick
-  m_Behaviour: 1
+  m_Behaviour: 0
   m_UseIsolatedInputActions: 0
   m_PointerDownAction:
     m_Name: 

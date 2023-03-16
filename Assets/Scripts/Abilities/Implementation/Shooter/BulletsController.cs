@@ -121,11 +121,11 @@ namespace RetroStyleGamesTest.Abillity.Implementation
                     return;
 
                 rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward
-                    * _bulletsStats.Speed * Time.deltaTime);
+                    * _bulletsStats.Speed);
                 try
                 {
                     await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
-                    bullet.TimeToDeleteLeft -= Time.deltaTime;
+                    bullet.TimeToDeleteLeft -= Time.fixedDeltaTime;
                 }
                 catch (TaskCanceledException) { }
             }

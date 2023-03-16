@@ -16,7 +16,7 @@ MonoBehaviour:
   enemy: {fileID: 114318063054421580, guid: 4a1345307ea00c941aed7208247e8d23, type: 3}
   Heals: 50
   StartHeals: 50
-  MoveSpeed: 2
+  MoveSpeed: 0.03
   RotationSpeed: 150
   ManaAtkill: 15
   Abilities:

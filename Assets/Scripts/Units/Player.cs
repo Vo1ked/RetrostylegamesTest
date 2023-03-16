@@ -128,7 +128,7 @@ namespace RetroStyleGamesTest.Units
 					return;
 				}
 				Vector3 movement = new Vector3(_direction.x, 0.0f, _direction.z);
-				_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed * Time.deltaTime);
+				_rigidbody.MovePosition(transform.position + movement * _playerStats.MoveSpeed);
 				await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 				if (_direction.magnitude > _moveThreshold && !token.IsCancellationRequested)
 				{

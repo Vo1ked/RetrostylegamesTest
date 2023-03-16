@@ -78,8 +78,8 @@ namespace RetroStyleGamesTest.Abillity.Implementation
 
                     var direction = (_player.transform.position - bullet.transform.position).normalized;
                     rigidBody.MovePosition(bullet.transform.position + direction
-                        * _bulletsStats.Speed * Time.deltaTime);
-                    bullet.TimeToDeleteLeft -= Time.deltaTime;
+                        * _bulletsStats.Speed);
+                    bullet.TimeToDeleteLeft -= Time.fixedDeltaTime;
 
                     await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
                 }

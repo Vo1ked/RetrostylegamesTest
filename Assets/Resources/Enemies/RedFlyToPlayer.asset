@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 194fd8c07056d2344aed0d13d77fbce4, type: 3}
   m_Name: RedFlyToPlayer
   m_EditorClassIdentifier: 
-  _flySpeed: 3
+  _flySpeed: 0.025

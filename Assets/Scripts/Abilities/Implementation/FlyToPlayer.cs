@@ -75,7 +75,7 @@ namespace RetroStyleGamesTest.Abillity.Implementation
                     return;
                 }
                 var direction = (_player.transform.position - movable.Rigidbody.position).normalized;
-                movable.Rigidbody.MovePosition(movable.Rigidbody.position + direction * _flySpeed * Time.deltaTime);
+                movable.Rigidbody.MovePosition(movable.Rigidbody.position + direction * _flySpeed);
 
                 await Task.Delay(Mathf.RoundToInt(Time.fixedDeltaTime * 1000f), token);
 
