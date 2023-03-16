@@ -57,6 +57,8 @@ namespace RetroStyleGamesTest.Abillity.Implementation
             {
                 foreach (IMovable movable in _movables)
                 {
+                    if (movable.Rigidbody == null)
+                        continue;
                     var destroyable = movable.Rigidbody.GetComponent<IDestroyable>();
                     destroyable.DestroyCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(_pauseManager.PauseCancellationToken.Token);
                     Fly(movable, destroyable.DestroyCancellationToken.Token);

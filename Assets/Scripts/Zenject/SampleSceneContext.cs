@@ -16,11 +16,6 @@ namespace RetroStyleGamesTest.Zenject
         private DisposeOnSceneExit _disposeOnSceneExit;
         public override void InstallBindings()
         {
-#if UNITY_EDITOR
-            Container.Bind<IPlayerInput>().To<KeyBoardInput>().FromComponentInHierarchy().AsSingle();
-#else
-        Container.Bind<IPlayerInput>().To<UiStickInput>().FromComponentInHierarchy().AsSingle();
-#endif
             _disposeOnSceneExit = new DisposeOnSceneExit();
             Container.Bind<DisposeOnSceneExit>().FromInstance(_disposeOnSceneExit).AsSingle();
             Container.Bind<SpawnPositionFactory>().AsSingle();
@@ -28,9 +23,15 @@ namespace RetroStyleGamesTest.Zenject
             Container.Bind<BulletContainer>().FromComponentInHierarchy().AsSingle();
             Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
             Container.Bind<UiManager>().FromComponentInHierarchy().AsSingle();
+
             var pauseManager = new PauseManager();
             Container.Bind<PauseManager>().FromInstance(pauseManager).AsSingle();
             _disposeOnSceneExit.Add(pauseManager);
+
+            var playerInput = new PlayerInput(pauseManager);
+            Container.Bind<IPlayerInput>().FromInstance(playerInput).AsSingle();
+            _disposeOnSceneExit.Add(playerInput);
+
             Container.Bind<Score>().AsSingle();
         }
 

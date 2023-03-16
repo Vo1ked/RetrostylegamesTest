@@ -117,10 +117,9 @@ namespace RetroStyleGamesTest.Abillity.Implementation
             var rigidBody = bullet.GetComponent<Rigidbody>();
             while (bullet.TimeToDeleteLeft > 0)
             {
-                if (token.IsCancellationRequested)
-                {
+                if (token.IsCancellationRequested || bullet == null)
                     return;
-                }
+
                 rigidBody.MovePosition(bullet.transform.position + -bullet.transform.forward
                     * _bulletsStats.Speed * Time.deltaTime);
                 try

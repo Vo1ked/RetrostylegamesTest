@@ -19,7 +19,7 @@ MonoBehaviour:
     MaxMana: 100
     StartMana: 50
   MoveSpeed: 4
-  RotationSpeed: 0.5
+  RotationSpeed: 0.05
   MaxUpRotation: -75
   MaxDownRotation: 35
   Abilities:

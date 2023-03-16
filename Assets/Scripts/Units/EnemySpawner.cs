@@ -181,6 +181,7 @@ namespace RetroStyleGamesTest.Units
             var stopwatch = new System.Diagnostics.Stopwatch();
             try
             {
+                stopwatch.Start();
                 await Task.Delay(Mathf.RoundToInt(waitTime * 1000f), token);
                 if (token.IsCancellationRequested)
                     return;
